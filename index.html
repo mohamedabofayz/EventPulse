@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartHotel AI - مكة والمدينة</title>
+    <title>SmartHotel AI - نظام التسعير الاستراتيجي 2026</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
@@ -29,7 +28,7 @@
             --danger: #dc3545;
             --font-sans: 'Cairo', Arial, sans-serif;
             
-            /* Heatmap Colors - Exact Thermal Colors */
+            /* Heatmap Colors */
             --very-high: #e74c3c;
             --high: #f39c12;
             --medium: #f1c40f;
@@ -40,7 +39,7 @@
         
         body {
             font-family: var(--font-sans);
-            background-color: #FFFFFF;
+            background-color: #F0F4F8;
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 40px;
@@ -61,8 +60,8 @@
         /* Panels */
         .glass-panel {
             background: var(--card-bg);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid white;
             border-radius: 16px;
             padding: clamp(15px, 3vw, 30px);
             margin-bottom: 30px;
@@ -70,7 +69,7 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
         }
 
@@ -79,7 +78,7 @@
             margin-bottom: 8px; 
             color: var(--dark-blue); 
             font-weight: 600; 
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
         
         input {
@@ -87,15 +86,15 @@
             background: var(--input-bg);
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 12px 15px;
+            padding: 10px 15px;
             border-radius: 8px;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
         input:focus { 
             border-color: var(--dark-blue); 
             outline: none; 
-            box-shadow: 0 0 0 3px rgba(10, 46, 90, 0.15);
+            box-shadow: 0 0 0 3px rgba(10, 46, 90, 0.1);
         }
 
         /* Room Types */
@@ -103,10 +102,10 @@
             display: grid;
             grid-template-columns: 2fr 1fr auto;
             gap: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             background: var(--light-blue);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 10px;
+            border-radius: 8px;
             align-items: center;
         }
 
@@ -124,48 +123,61 @@
             gap: 8px;
             font-family: var(--font-sans);
             font-size: 1rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         .btn-primary { 
             background: var(--dark-blue); 
             color: white; 
             width: 100%; 
             margin-top: 20px;
-            border: 1px solid var(--dark-blue);
+            box-shadow: 0 4px 15px rgba(10, 46, 90, 0.3);
         }
         .btn-primary:hover { 
             background: #082348; 
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(10, 46, 90, 0.25);
         }
         .btn-danger { 
-            background: #fff; 
-            color: var(--danger); 
-            width: 40px; 
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-weight: bold;
-            padding: 0;
-            height: 40px;
-        }
-        .btn-danger:hover {
-            background: #ffebee;
-            border-color: var(--danger);
-            color: var(--danger);
+            background: #fff; color: var(--danger); width: 35px; height: 35px; border: 1px solid #ffccd0; padding: 0;
         }
         .btn-success {
-            background: var(--green);
+            background: var(--green); color: white; width: auto; font-size: 0.9rem; padding: 8px 15px; margin-top: 10px;
+        }
+
+        /* Floating Settings Button */
+        .settings-fab {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            width: 65px;
+            height: 65px;
+            background: var(--dark-blue);
             color: white;
-            border: 1px solid var(--green);
-            width: auto;
-            font-size: 0.9rem;
-            padding: 8px 15px;
-            margin-top: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 999;
+            transition: transform 0.3s;
+            border: 2px solid white;
         }
-        .btn-success:hover {
-            background: #219653;
-            transform: translateY(-1px);
+        .settings-fab:hover { transform: rotate(45deg) scale(1.1); }
+        .settings-fab::after {
+            content: 'الإعدادات';
+            position: absolute;
+            right: 75px;
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            white-space: nowrap;
         }
+        .settings-fab:hover::after { opacity: 1; }
 
         /* Dashboard Stats */
         .dashboard-grid {
@@ -179,263 +191,181 @@
             background: var(--card-bg);
             padding: 20px;
             border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--dark-blue);
         }
 
         .stat-value { 
-            font-size: 1.8rem; 
-            font-weight: 800; 
-            color: var(--dark-blue); 
-            margin: 8px 0; 
+            font-size: 1.8rem; font-weight: 800; color: var(--dark-blue); margin: 8px 0; 
         }
         .stat-label { 
-            color: var(--text-muted); 
-            font-size: 0.95rem; 
-            font-weight: 600;
+            color: var(--text-muted); font-size: 0.9rem; font-weight: 600;
         }
         .profit-badge { 
-            color: var(--green); 
-            font-weight: bold; 
-            background: rgba(39, 174, 96, 0.1); 
-            padding: 4px 10px; 
-            border-radius: 6px; 
-            font-size: 0.9rem; 
-            display: inline-block;
-            margin-top: 8px;
-            border: 1px solid rgba(39, 174, 96, 0.2);
-        }
-
-        /* Legend */
-        .legend-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin: 25px 0;
-            padding: 15px;
-            background: var(--light-blue);
-            border-radius: 12px;
-            border: 1px solid #c3e0ff;
-        }
-        .legend-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            font-size: 0.95rem; 
-            color: var(--dark-blue);
-            font-weight: 500;
-        }
-        .dot { 
-            width: 14px; 
-            height: 14px; 
-            border-radius: 50%; 
-            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(39, 174, 96, 0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; display: inline-block; margin-top: 8px;
         }
 
         /* Calendar */
         .month-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 25px; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; 
         }
         .month-card { 
-            background: var(--card-bg); 
-            border-radius: 14px; 
-            overflow: hidden; 
-            border: 1px solid var(--border);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            transition: transform 0.3s;
+            background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .month-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
-        }
-        
         .month-header {
-            background: var(--dark-blue); 
-            padding: 14px 20px;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            cursor: pointer; 
-            transition: 0.2s;
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
+            background: var(--dark-blue); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; color: white; font-weight: 600; cursor: pointer;
         }
-        .month-header:hover { 
-            background: #0d3a73; 
-        }
-        .month-header span:last-child {
-            font-size: 0.9rem;
-            background: rgba(255,255,255,0.2);
-            padding: 3px 10px;
-            border-radius: 12px;
-        }
-
         .days-container { 
-            display: grid; 
-            grid-template-columns: repeat(7, 1fr); 
-            padding: 12px; 
-            gap: 4px;
-            background: #f8f9fa;
+            display: grid; grid-template-columns: repeat(7, 1fr); padding: 10px; gap: 3px; background: #fff;
         }
-        
         .day-cell {
-            aspect-ratio: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            border-radius: 8px; 
-            font-size: 0.95rem; 
-            cursor: pointer; 
-            transition: all 0.2s;
-            background: var(--neutral);
-            border: 1px solid var(--border);
-            font-weight: 500;
-            position: relative;
-            color: var(--text-main);
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; position: relative;
         }
-        .day-cell:hover { 
-            transform: scale(1.08); 
-            z-index: 2; 
-            border-color: var(--dark-blue);
-            box-shadow: 0 0 0 2px var(--dark-blue);
-            color: var(--dark-blue);
-        }
+        .day-cell:hover { transform: scale(1.1); z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
 
-        /* Heatmap Color Classes - Strict Flat Colors Only */
+        /* Heatmap Classes */
         .heat-very-high { background-color: var(--very-high); color: white; }
         .heat-high { background-color: var(--high); color: white; }
         .heat-medium { background-color: var(--medium); color: #212529; }
-        .heat-neutral { background-color: var(--neutral); color: var(--text-main); }
+        .heat-neutral { background-color: #f8f9fa; color: #aaa; border: 1px solid #eee; }
 
-        /* Modals & Tables */
+        /* Toggle Switch */
+        .switch-container {
+            display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;
+        }
+        .switch {
+            position: relative; display: inline-block; width: 46px; height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--green); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Modals */
         .modal {
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.7); 
-            z-index: 1000;
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            opacity: 0; 
-            pointer-events: none; 
-            transition: 0.3s;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s;
         }
-        .modal.active { 
-            opacity: 1; 
-            pointer-events: all; 
-        }
+        .modal.active { opacity: 1; pointer-events: all; }
         .modal-content { 
-            background: var(--modal-bg); 
-            width: 95%; 
-            max-width: 1000px; 
-            max-height: 90vh; 
-            overflow-y: auto; 
-            padding: 25px; 
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            border: 1px solid var(--border);
-        }
-        
-        .table-responsive { 
-            overflow-x: auto; 
-            margin-top: 15px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            min-width: 600px; 
-            font-size: 0.95rem;
-        }
-        th, td { 
-            padding: 14px 12px; 
-            text-align: right; 
-            border-bottom: 1px solid var(--border); 
-        }
-        th { 
-            background: var(--light-blue); 
-            color: var(--dark-blue); 
-            font-weight: 700;
-            position: sticky;
-            top: 0;
-        }
-        tr:hover td {
-            background: rgba(231, 241, 255, 0.5);
-        }
-        
-        .hidden { 
-            display: none !important; 
-        }
-        .export-btn { 
-            background: var(--green); 
-            color: white; 
-            margin-top: 20px; 
-            width: auto; 
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
-        }
-        .export-btn:hover {
-            background: #219653;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+            background: white; width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
 
-        .close-modal {
-            background: #f1f3f5;
-            border: 1px solid var(--border);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .settings-section { margin-bottom: 20px; }
+        .settings-section h3 { color: var(--dark-blue); border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 15px; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; }
+        th { background: var(--light-blue); color: var(--dark-blue); position: sticky; top: 0; }
+        
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Strategies Footer */
+        #strategiesFooter {
+            margin-top: 30px;
+            padding: 25px;
+        }
+        
+        .strategies-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .strategy-card {
+            background: var(--light-blue);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--dark-blue);
+            transition: transform 0.3s ease;
+        }
+        
+        .strategy-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .strategy-card h3 {
+            color: var(--dark-blue);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+        }
+        
+        .strategy-card h3::before {
+            content: "✓";
+            color: var(--green);
             font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .strategy-card p {
             color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
+            line-height: 1.6;
+            font-size: 0.95rem;
         }
-        .close-modal:hover {
-            background: #e9ecef;
-            color: var(--danger);
-            transform: rotate(90deg);
+        
+        .strategy-badge {
+            display: inline-block;
+            background: rgba(10, 46, 90, 0.1);
+            color: var(--dark-blue);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-top: 8px;
         }
 
+        /* Heatmap Legend */
+        .heatmap-legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--light-blue);
+            border-radius: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+        
+        .legend-color {
+            width: 40px;
+            height: 20px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        .legend-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .heat-very-high { background-color: var(--very-high); }
+        .heat-high { background-color: var(--high); }
+        .heat-medium { background-color: var(--medium); }
+        .heat-neutral { background-color: #f8f9fa; border: 1px solid #eee; }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .form-grid,
-            .dashboard-grid,
-            .month-grid {
-                grid-template-columns: 1fr;
-            }
-            .room-type-row {
-                grid-template-columns: 1fr 1fr auto;
-            }
-            .legend-container {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            .form-grid { grid-template-columns: 1fr; }
+            .room-type-row { grid-template-columns: 1fr 1fr auto; }
+            .strategies-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -444,163 +374,273 @@
 <div class="container">
     <header>
         <h1>SmartHotel AI</h1>
-        <p style="color: var(--gray); font-size: 1.1rem; margin-top: 8px;">نظام تسعير ذكي لمواسم مكة المكرمة والمدينة المنورة</p>
+        <p style="color: var(--gray);">نظام إدارة الإيرادات الذكي (مكة والمدينة 2026)</p>
     </header>
 
     <div class="glass-panel fade-in">
-        <h2 style="margin-bottom: 15px; color: var(--dark-blue); font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
-            <span>📊</span> بيانات الفندق والمالية
-        </h2>
+        <h2 style="margin-bottom: 20px; color: var(--dark-blue);">📄 بيانات الفندق الأساسية</h2>
         <form id="hotelForm">
             <div class="form-grid">
-                <div class="form-group">
-                    <label>اسم الفندق</label>
-                    <input type="text" id="hotelName" value="فندق الحرم">
-                </div>
-                <div class="form-group">
-                    <label>إجمالي عدد الغرف</label>
-                    <input type="number" id="totalRooms" value="100">
-                </div>
-                <div class="form-group">
-                    <label>عدد الغرف ذات الإطلالة (المهمة)</label>
-                    <input type="number" id="viewRooms" value="30" placeholder="حرم/كعبة">
-                </div>
-                <div class="form-group">
-                    <label>متوسط سعر الليلة (خارج الموسم)</label>
-                    <input type="number" id="basePrice" value="400">
-                </div>
-                <div class="form-group">
-                    <label>قيمة الإيجار السنوي (ريال)</label>
-                    <input type="number" id="annualRent" value="5000000">
-                </div>
-                <div class="form-group">
-                    <label>نسبة صافي الربح الحالية (%)</label>
-                    <input type="number" id="currentProfitMargin" value="15">
-                </div>
+                <div class="form-group"><label>اسم الفندق</label><input type="text" id="hotelName" value="فندق الحرم 2026"></div>
+                <div class="form-group"><label>إجمالي الغرف</label><input type="number" id="totalRooms" value="150"></div>
+                <div class="form-group"><label>غرف مطلة</label><input type="number" id="viewRooms" value="45"></div>
+                <div class="form-group"><label>السعر الأساسي (ريال)</label><input type="number" id="basePrice" value="450"></div>
+                <div class="form-group"><label>الإيجار السنوي</label><input type="number" id="annualRent" value="6000000"></div>
+                <div class="form-group"><label>هامش الربح الحالي %</label><input type="number" id="currentProfitMargin" value="12"></div>
             </div>
 
-            <h3 style="margin: 20px 0 15px; font-size: 1.1rem; color: var(--dark-blue); font-weight: 700;">توزيع أنواع الغرف</h3>
+            <h3 style="margin: 20px 0 10px; font-size: 1rem; color: var(--dark-blue);">أنواع الغرف</h3>
             <div id="roomTypesContainer">
                 <div class="room-type-row">
-                    <input type="text" class="rt-name" value="غرفة ثنائية" placeholder="النوع">
-                    <input type="number" class="rt-count" value="60" placeholder="العدد">
+                    <input type="text" class="rt-name" value="غرفة مزدوجة" placeholder="النوع">
+                    <input type="number" class="rt-count" value="100" placeholder="العدد">
                     <button type="button" class="btn btn-danger remove-rt">×</button>
                 </div>
                 <div class="room-type-row">
-                    <input type="text" class="rt-name" value="جناح رباعي" placeholder="النوع">
-                    <input type="number" class="rt-count" value="40" placeholder="العدد">
+                    <input type="text" class="rt-name" value="جناح ملكي" placeholder="النوع">
+                    <input type="number" class="rt-count" value="50" placeholder="العدد">
                     <button type="button" class="btn btn-danger remove-rt">×</button>
                 </div>
             </div>
             <button type="button" class="btn btn-success" id="addRoomBtn">+ إضافة نوع</button>
 
-            <button type="submit" class="btn btn-primary" id="analyzeBtn">🚀 تحليل البيانات وبناء الخطة السعرية 2026</button>
+            <button type="submit" class="btn btn-primary" id="analyzeBtn">تحليل البيانات وتطبيق الاستراتيجيات</button>
         </form>
     </div>
 
-    <div id="resultsArea" class="hidden">
-        
+    <div id="resultsArea" class="hidden fade-in">
         <div class="dashboard-grid">
             <div class="stat-card">
-                <div class="stat-label">الإيراد السنوي المتوقع (AI)</div>
+                <div class="stat-label">الإيراد السنوي المتوقع</div>
                 <div class="stat-value" id="totalRevenueDisplay">0</div>
-                <div class="stat-label" style="color: var(--green);">+32% مقارنة بالعام الماضي</div>
+                <div class="profit-badge" id="revBoostBadge" style="background:#e0f2fe; color:var(--dark-blue)"></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">صافي الربح المتوقع (بعد الإيجار)</div>
+                <div class="stat-label">صافي الربح</div>
                 <div class="stat-value" style="color: var(--green);" id="netProfitDisplay">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">نسبة هامش الربح الجديدة</div>
+                <div class="stat-label">هامش الربح الجديد</div>
                 <div class="stat-value" id="newMarginDisplay">0%</div>
-                <div class="profit-badge" id="marginImprovement">تحسن بنسبة +8.2% ⬆</div>
+                <div class="profit-badge" id="marginImprovement"></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">متوسط الإشغال السنوي</div>
+                <div class="stat-label">معدل الإشغال السنوي</div>
                 <div class="stat-value" id="occupancyDisplay">0%</div>
-                <div class="stat-label" style="color: var(--orange);">+15% في المواسم الرئيسية</div>
+                <div class="stat-label" style="font-size:0.8rem; color:var(--orange)">محسن بواسطة Min Stay AI</div>
             </div>
         </div>
 
-        <div class="legend-container">
-            <div class="legend-item"><div class="dot" style="background:#f39c12;"></div>رمضان (عادي)</div>
-            <div class="legend-item"><div class="dot" style="background:#e74c3c;"></div>العشر الأواخر</div>
-            <div class="legend-item"><div class="dot" style="background:#e74c3c;"></div>موسم الحج</div>
-            <div class="legend-item"><div class="dot" style="background:#f1c40f;"></div>عطلة نهاية أسبوع</div>
-            <div class="legend-item"><div class="dot" style="background:#ffffff; border:1px solid #dee2e6;"></div>أيام عادية</div>
+        <div class="heatmap-legend">
+            <div class="legend-item">
+                <div class="legend-color heat-very-high"></div>
+                <span class="legend-label">ذروة عالية جداً</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color heat-high"></div>
+                <span class="legend-label">ذروة عالية</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color heat-medium"></div>
+                <span class="legend-label">ذروة متوسطة</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color heat-neutral"></div>
+                <span class="legend-label">عادي</span>
+            </div>
         </div>
 
-        <div style="text-align: left; margin-top: 15px;">
-            <button class="btn export-btn" id="exportBtn">
-                <span>📥</span> تصدير ملف Excel شامل
-            </button>
+        <div style="text-align: left; margin: 20px 0;">
+            <button class="btn btn-success" id="exportBtn" style="width: auto;">📥 تصدير Excel شامل</button>
         </div>
 
-        <div class="month-grid" id="calendarGrid" style="margin-top: 30px;"></div>
+        <div class="month-grid" id="calendarGrid"></div>
+    </div>
+
+    <div id="strategiesFooter" class="glass-panel hidden fade-in">
+        <h2 style="margin-bottom: 20px; color: var(--dark-blue); display: flex; align-items: center; gap: 10px;">
+            <span>📊 الاستراتيجيات المطبقة</span>
+            <span class="strategy-badge">مُحسّن بواسطة الذكاء الاصطناعي</span>
+        </h2>
+        <div class="strategies-container" id="strategiesContainer"></div>
     </div>
 </div>
 
-<div class="modal" id="dayModal">
-    <div class="modal-content" style="max-width: 600px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 id="modalDateTitle" style="color:var(--dark-blue); font-size: 1.4rem;"></h3>
-            <button class="close-modal" onclick="closeModal('dayModal')">×</button>
-        </div>
-        <p id="modalSeasonInfo" style="margin-bottom:15px; color: var(--gray); background: var(--light-blue); padding: 10px; border-radius: 8px; border-left: 3px solid var(--dark-blue);"></p>
-        
-        <div class="table-responsive">
-            <table style="font-size:0.95rem;">
-                <thead>
-                    <tr>
-                        <th>نوع الغرفة</th>
-                        <th>السعر (عادي)</th>
-                        <th>سعر الإطلالة (+40%)</th>
-                        <th>الإيراد</th>
-                    </tr>
-                </thead>
-                <tbody id="dayModalBody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
+<div class="settings-fab" onclick="openSettings()">⚙️</div>
 
-<div class="modal" id="monthModal">
+<div class="modal" id="settingsModal">
     <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 20px;">
-            <h2 id="monthModalTitle" style="color:var(--dark-blue); font-size: 1.6rem;"></h2>
-            <button class="close-modal" onclick="closeModal('monthModal')">×</button>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <h2 style="color:var(--dark-blue)">⚙️ إعدادات الاستراتيجيات الذكية</h2>
+            <button class="btn btn-danger" onclick="closeModal('settingsModal')">×</button>
         </div>
-        <div class="table-responsive" style="max-height: 70vh;">
-            <table id="monthTable">
-                <thead style="position: sticky; top: 0; background: white; z-index: 10;">
-                    <tr id="monthTableHead"></tr>
-                </thead>
-                <tbody id="monthTableBody"></tbody>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div class="settings-section">
+                <h3>1. استراتيجيات التسعير (Pricing)</h3>
+                
+                <div class="switch-container">
+                    <div>
+                        <strong>الحجز المبكر (Early Booking)</strong>
+                        <div style="font-size:0.8rem; color:#777">زيادة الأسعار في رمضان/حج بنسبة 35-45%</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="st_early" checked><span class="slider"></span></label>
+                </div>
+
+                <div class="switch-container">
+                    <div>
+                        <strong>التسعير الديناميكي (Dynamic)</strong>
+                        <div style="font-size:0.8rem; color:#777">تعديل يومي + Premium Events (يوم التأسيس/الوطني)</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="st_dynamic" checked><span class="slider"></span></label>
+                </div>
+
+                <div class="switch-container">
+                    <div>
+                        <strong>تسعير الأحداث (Event-Specific)</strong>
+                        <div style="font-size:0.8rem; color:#777">زيادة 40% للأحداث الكبرى (فورمولا/مؤتمرات)</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="st_event" checked><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>2. تعظيم الإيرادات (Boosters)</h3>
+                
+                <div class="switch-container">
+                    <div>
+                        <strong>حزم الترقية (Upselling)</strong>
+                        <div style="font-size:0.8rem; color:#777">إضافة وجبات/نقل (+6% ADR)</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="st_upsell" checked><span class="slider"></span></label>
+                </div>
+
+                <div class="switch-container">
+                    <div>
+                        <strong>حزم الشركات (Corporate)</strong>
+                        <div style="font-size:0.8rem; color:#777">عروض المؤتمرات والمعارض (+20%)</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="st_corp"><span class="slider"></span></label>
+                </div>
+
+                <div class="switch-container">
+                    <div>
+                        <strong>الحد الأدنى للإقامة (Min Stay)</strong>
+                        <div style="font-size:0.8rem; color:#777">فرض ليلتين في الذروة (استقرار الإشغال)</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="st_minstay" checked><span class="slider"></span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section" style="margin-top:20px;">
+            <h3>3. مضاعفات المواسم (Multipliers)</h3>
+            <div class="form-grid" style="background:#f8f9fa; padding:15px; border-radius:10px;">
+                <div class="form-group">
+                    <label>رمضان (%)</label>
+                    <input type="number" id="mul_ramadan" value="250">
+                </div>
+                <div class="form-group">
+                    <label>العشر الأواخر (%)</label>
+                    <input type="number" id="mul_last10" value="400">
+                </div>
+                <div class="form-group">
+                    <label>موسم الحج (%)</label>
+                    <input type="number" id="mul_hajj" value="450">
+                </div>
+                <div class="form-group">
+                    <label>عطلة نهاية الأسبوع (%)</label>
+                    <input type="number" id="mul_weekend" value="130">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="applySettings()">💾 حفظ وتطبيق التغييرات</button>
+    </div>
+</div>
+
+<div class="modal" id="detailsModal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 id="detailsTitle"></h3>
+            <button class="btn btn-danger" onclick="closeModal('detailsModal')">×</button>
+        </div>
+        <div class="table-responsive" style="overflow-x:auto;">
+            <table id="detailsTable">
+                <thead id="detailsHead"></thead>
+                <tbody id="detailsBody"></tbody>
             </table>
         </div>
     </div>
 </div>
 
 <script>
+    // --- Configuration & State ---
     const state = {
         hotelInfo: {},
         roomTypes: [],
         yearlyData: [],
-        months: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+        strategies: {
+            earlyBooking: true,
+            dynamicPricing: true,
+            eventPricing: true,
+            upselling: true,
+            corporate: false,
+            minStay: true
+        },
+        multipliers: {
+            ramadan: 2.5,
+            lastTen: 4.0,
+            hajj: 4.5,
+            weekend: 1.3
+        }
     };
 
-    // Dates for Makkah/Madinah Seasons 2026 (Approximate Hijri to Gregorian)
-    // Ramadan 1447: ~Feb 18 - Mar 19
-    // Hajj 1447: ~May 16 - May 21
-    const seasons2026 = {
-        ramadanStart: new Date(2026, 1, 18), // Feb 18
-        lastTenStart: new Date(2026, 2, 9),  // Mar 9
-        ramadanEnd: new Date(2026, 2, 19),   // Mar 19
-        hajjStart: new Date(2026, 4, 15),    // May 15
-        hajjEnd: new Date(2026, 4, 25)       // May 25
+    // Strategy information mapping
+    const strategyInfo = {
+        earlyBooking: {
+            name: "الحجز المبكر",
+            desc: "زيادة الأسعار بنسبة 35-45% في مواسم الذروة (رمضان، الحج) لتحفيز الحجوزات المبكرة وزيادة الإيرادات. يطبق تلقائياً عند اكتشاف مواسم الذروة."
+        },
+        dynamicPricing: {
+            name: "التسعير الديناميكي",
+            desc: "تعديل الأسعار يومياً بناءً على العرض والطلب مع زيادات خاصة للأحداث الوطنية (يوم التأسيس، اليوم الوطني). يستخدم خوارزميات التعلم الآلي للتنبؤ بالطلب."
+        },
+        eventPricing: {
+            name: "تسعير الأحداث",
+            desc: "زيادة الأسعار بنسبة 40% خلال الفعاليات الكبرى (فورمولا 1، المؤتمرات الدولية) لتحقيق أقصى ربح من المناسبات الخاصة. يتضمن كشف تلقائي للأحداث."
+        },
+        upselling: {
+            name: "حزم الترقية",
+            desc: "عرض خدمات إضافية (وجبات فاخرة، نقل خاص) لزيادة متوسط سعر الغرفة اليومي (ADR) بنسبة 6%. يظهر لضيوف الحجز المبكر كخيارات إضافية."
+        },
+        corporate: {
+            name: "عروض الشركات",
+            desc: "خصومات مميزة للشركات والفعاليات (مثل المعارض) لزيادة الإشغال في المواسم المنخفضة. يشمل عقوداً سنوية بمرونة في الأسعار."
+        },
+        minStay: {
+            name: "الحد الأدنى للإقامة",
+            desc: "فرض إقامة ليلتين على الأقل في مواسم الذروة لتحسين استقرار الإشغال وزيادة الإيرادات. يمنع الحجوزات القصيرة التي تقلل الربحية."
+        }
     };
 
-    // Listeners
+    const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    
+    // Key Dates for 2026 (Approximate)
+    const events2026 = {
+        foundingDay: new Date(2026, 1, 22), // Feb 22
+        nationalDay: new Date(2026, 8, 23), // Sep 23
+        ramadanStart: new Date(2026, 1, 18),
+        lastTenStart: new Date(2026, 2, 9),
+        ramadanEnd: new Date(2026, 2, 19),
+        hajjStart: new Date(2026, 4, 15),
+        hajjEnd: new Date(2026, 4, 25),
+        // Adding specific prompt events adapted for simulation
+        summerFest: { start: new Date(2026, 6, 1), end: new Date(2026, 7, 30) }, // July-Aug
+        corporateSeason: { start: new Date(2026, 9, 1), end: new Date(2026, 9, 15) } // Oct (Construct Expo equivalent)
+    };
+
+    // --- Event Listeners ---
     document.getElementById('addRoomBtn').addEventListener('click', () => {
         const div = document.createElement('div');
         div.className = 'room-type-row';
@@ -619,11 +659,31 @@
 
     document.getElementById('exportBtn').addEventListener('click', exportExcel);
 
+    function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function applySettings() {
+        // Update Strategies from Toggle Switches
+        state.strategies.earlyBooking = document.getElementById('st_early').checked;
+        state.strategies.dynamicPricing = document.getElementById('st_dynamic').checked;
+        state.strategies.eventPricing = document.getElementById('st_event').checked;
+        state.strategies.upselling = document.getElementById('st_upsell').checked;
+        state.strategies.corporate = document.getElementById('st_corp').checked;
+        state.strategies.minStay = document.getElementById('st_minstay').checked;
+
+        // Update Multipliers
+        state.multipliers.ramadan = Number(document.getElementById('mul_ramadan').value) / 100;
+        state.multipliers.lastTen = Number(document.getElementById('mul_last10').value) / 100;
+        state.multipliers.hajj = Number(document.getElementById('mul_hajj').value) / 100;
+        state.multipliers.weekend = Number(document.getElementById('mul_weekend').value) / 100;
+
+        closeModal('settingsModal');
+        runAnalysis(); // Re-run analysis with new settings
+    }
 
     // --- Core Analysis Logic ---
     function runAnalysis() {
-        // 1. Gather Inputs
+        // 1. Get Form Data
         state.hotelInfo = {
             name: document.getElementById('hotelName').value,
             totalRooms: Number(document.getElementById('totalRooms').value),
@@ -640,251 +700,316 @@
             if(name && count) state.roomTypes.push({ name, count });
         });
 
-        if(state.roomTypes.length === 0) { alert('أضف نوع غرفة واحد على الأقل'); return; }
+        if(state.roomTypes.length === 0) return alert('أضف نوع غرفة واحد على الأقل');
 
         // 2. Generate Data
-        state.yearlyData = generateMakkahData();
+        state.yearlyData = generateData();
 
         // 3. Render
-        renderStats();
-        renderCalendar();
-        
+        renderDashboard();
         document.getElementById('resultsArea').classList.remove('hidden');
-        document.getElementById('resultsArea').scrollIntoView({behavior:'smooth'});
+        document.getElementById('strategiesFooter').classList.remove('hidden');
+        
+        // Scroll to results
+        window.scrollTo({ top: document.getElementById('resultsArea').offsetTop - 50, behavior: 'smooth' });
     }
 
-    function generateMakkahData() {
+    function generateData() {
         const data = [];
-        const viewRatio = state.hotelInfo.viewRooms / state.hotelInfo.totalRooms; // % of rooms with view
+        const viewRatio = state.hotelInfo.viewRooms / state.hotelInfo.totalRooms;
 
         for (let m = 0; m < 12; m++) {
             const daysInMonth = new Date(2026, m + 1, 0).getDate();
             for (let d = 1; d <= daysInMonth; d++) {
                 const date = new Date(2026, m, d);
                 const dayOfWeek = date.getDay();
-                const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6); // Fri/Sat
+                const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6);
                 
-                let season = "عادي";
-                let multiplier = 1.0;
-                let cssClass = "";
+                let seasonName = "عادي";
+                let baseMult = 1.0;
+                let activeStrategies = [];
 
-                // Logic for Seasons
-                if (date >= seasons2026.ramadanStart && date <= seasons2026.ramadanEnd) {
-                    if (date >= seasons2026.lastTenStart) {
-                        season = "العشر الأواخر";
-                        multiplier = 3.5;
-                        cssClass = "day-last10";
-                    } else {
-                        season = "رمضان";
-                        multiplier = 2.0;
-                        cssClass = "day-ramadan";
-                    }
-                } else if (date >= seasons2026.hajjStart && date <= seasons2026.hajjEnd) {
-                    season = "حج";
-                    multiplier = 4.0;
-                    cssClass = "day-hajj";
+                // --- 1. Base Season Logic ---
+                if (date >= events2026.lastTenStart && date <= events2026.ramadanEnd) {
+                    seasonName = "العشر الأواخر";
+                    baseMult = state.multipliers.lastTen;
+                } else if (date >= events2026.ramadanStart && date <= events2026.ramadanEnd) {
+                    seasonName = "رمضان";
+                    baseMult = state.multipliers.ramadan;
+                } else if (date >= events2026.hajjStart && date <= events2026.hajjEnd) {
+                    seasonName = "موسم الحج";
+                    baseMult = state.multipliers.hajj;
                 } else if (isWeekend) {
-                    season = "عطلة نهاية أسبوع";
-                    multiplier = 1.3;
-                    cssClass = "day-weekend";
+                    seasonName = "نهاية الأسبوع";
+                    baseMult = state.multipliers.weekend;
                 }
 
-                // Calculate Day Metrics
-                let dailyRev = 0;
-                const roomData = [];
+                // --- 2. Apply Strategies ---
+                
+                // Strategy: Early Booking (Boosts Peak Seasons)
+                if (state.strategies.earlyBooking && (seasonName.includes("رمضان") || seasonName.includes("الحج"))) {
+                    // Logic: Early booking secures higher average rate
+                    baseMult += 0.35; // +35% impact
+                    activeStrategies.push("earlyBooking");
+                }
 
-                state.roomTypes.forEach((rt, idx) => {
-                    let typeBasePrice = state.hotelInfo.basePrice * (1 + (idx * 0.3));
-                    let finalPrice = Math.round(typeBasePrice * multiplier);
-                    
-                    let occ = 60;
-                    if(season.includes("رمضان") || season.includes("حج")) occ = 95;
-                    else if(isWeekend) occ = 75;
+                // Strategy: Event Pricing (National Day / Founding Day)
+                if (state.strategies.eventPricing) {
+                    if (date.getTime() === events2026.foundingDay.getTime()) {
+                        seasonName = "يوم التأسيس";
+                        baseMult = Math.max(baseMult, 2.5);
+                        activeStrategies.push("eventPricing");
+                    }
+                    if (date.getTime() === events2026.nationalDay.getTime()) {
+                        seasonName = "اليوم الوطني";
+                        baseMult = Math.max(baseMult, 2.5);
+                        activeStrategies.push("eventPricing");
+                    }
+                }
+
+                // Strategy: Corporate (October Season)
+                if (state.strategies.corporate && date >= events2026.corporateSeason.start && date <= events2026.corporateSeason.end) {
+                    if (baseMult < 1.5) { // Only boost if not already peak
+                        baseMult = 1.3;
+                        seasonName = "موسم أعمال";
+                        activeStrategies.push("corporate");
+                    }
+                }
+
+                // Strategy: Dynamic Pricing (Summer)
+                if (state.strategies.dynamicPricing && date >= events2026.summerFest.start && date <= events2026.summerFest.end) {
+                    if (baseMult < 1.2) {
+                        baseMult = 1.25; // Slight boost for Summer Fest
+                        activeStrategies.push("dynamicPricing");
+                    }
+                }
+
+                // --- 3. Calculate Occupancy & Revenue ---                
+                // Base Occupancy
+                let occ = 55; // Standard
+                if (baseMult > 2.0) occ = 90;
+                else if (baseMult > 1.2) occ = 75;
+
+                // Strategy: Min Stay (Stabilize Occupancy in Peak)
+                if (state.strategies.minStay && baseMult > 2.0) {
+                    occ = 98; // Force near full occupancy
+                    activeStrategies.push("minStay");
+                }
+
+                // Strategy: Upselling (Add Value to Rate)
+                let upsellingValue = 0;
+                if (state.strategies.upselling) {
+                    upsellingValue = state.hotelInfo.basePrice * 0.06; // +6% ADR
+                    activeStrategies.push("upselling");
+                }
+
+                // Calculate Rooms
+                let dailyTotalRev = 0;
+                const roomDetails = state.roomTypes.map((rt, idx) => {
+                    const typeBase = state.hotelInfo.basePrice * (1 + (idx * 0.4));
+                    const finalRate = Math.round((typeBase * baseMult) + upsellingValue);
                     
                     const viewCount = Math.round(rt.count * viewRatio);
-                    const standardCount = rt.count - viewCount;
-                    const viewPrice = Math.round(finalPrice * 1.4);
+                    const stdCount = rt.count - viewCount;
                     
-                    const typeRev = (standardCount * finalPrice * (occ/100)) + (viewCount * viewPrice * (occ/100));
+                    // View rooms get 30% extra premium
+                    const viewRate = Math.round(finalRate * 1.3);
                     
-                    roomData.push({
-                        name: rt.name,
-                        stdPrice: finalPrice,
-                        viewPrice: viewPrice,
-                        occ: occ,
-                        rev: Math.round(typeRev)
-                    });
-                    
-                    dailyRev += typeRev;
+                    const rev = (stdCount * finalRate * (occ/100)) + (viewCount * viewRate * (occ/100));
+                    dailyTotalRev += rev;
+
+                    return { name: rt.name, rate: finalRate, viewRate: viewRate, rev: rev };
                 });
 
                 data.push({
                     date: date,
-                    monthIndex: m,
+                    monthIdx: m,
                     day: d,
-                    season: season,
-                    multiplier: multiplier,
-                    cssClass: cssClass,
-                    rooms: roomData,
-                    totalRev: Math.round(dailyRev)
+                    season: seasonName,
+                    mult: baseMult,
+                    occ: occ,
+                    strategies: activeStrategies,
+                    rooms: roomDetails,
+                    totalRev: Math.round(dailyTotalRev)
                 });
             }
         }
         return data;
     }
 
-    function renderStats() {
+    function renderDashboard() {
+        // Stats
         const totalRev = state.yearlyData.reduce((a, b) => a + b.totalRev, 0);
         const rent = state.hotelInfo.rent;
-        const opsCost = totalRev * 0.20; 
-        const netProfit = totalRev - rent - opsCost;
-        const netMargin = (netProfit / totalRev) * 100;
-
-        document.getElementById('totalRevenueDisplay').textContent = (totalRev/1000000).toFixed(2) + " مليون ريال";
-        document.getElementById('netProfitDisplay').textContent = (netProfit/1000000).toFixed(2) + " مليون ريال";
-        document.getElementById('newMarginDisplay').textContent = netMargin.toFixed(1) + "%";
+        const opsCost = totalRev * 0.22; // 22% Ops cost
+        const net = totalRev - rent - opsCost;
+        const margin = (net / totalRev) * 100;
         
-        const diff = netMargin - state.hotelInfo.currentMargin;
+        document.getElementById('totalRevenueDisplay').textContent = (totalRev/1000000).toFixed(2) + " مليون ريال";
+        document.getElementById('netProfitDisplay').textContent = (net/1000000).toFixed(2) + " مليون ريال";
+        document.getElementById('newMarginDisplay').textContent = margin.toFixed(1) + "%";
+        
+        const diff = margin - state.hotelInfo.currentMargin;
         const badge = document.getElementById('marginImprovement');
-        badge.textContent = diff > 0 ? `تحسن بنسبة +${diff.toFixed(1)}% ⬆` : `انخفاض ${diff.toFixed(1)}%`;
+        badge.textContent = diff > 0 ? `تحسن +${diff.toFixed(1)}%` : `تغير ${diff.toFixed(1)}%`;
         badge.style.color = diff > 0 ? 'var(--green)' : 'var(--red)';
         
-        const avgOcc = state.yearlyData.reduce((a,b) => a + b.rooms[0].occ, 0) / 365;
-        document.getElementById('occupancyDisplay').textContent = Math.round(avgOcc) + "%";
-    }
+        // Count Active Strategies for Badge
+        const activeCount = Object.values(state.strategies).filter(Boolean).length;
+        document.getElementById('revBoostBadge').textContent = `تم تفعيل ${activeCount} استراتيجيات ذكية`;
 
-    function renderCalendar() {
+        const avgOcc = state.yearlyData.reduce((a,b) => a + b.occ, 0) / 365;
+        document.getElementById('occupancyDisplay').textContent = Math.round(avgOcc) + "%";
+
+        // Calendar
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
-
-        state.months.forEach((mName, mIdx) => {
+        
+        monthsAr.forEach((mName, mIdx) => {
             const card = document.createElement('div');
             card.className = 'month-card';
             
             const header = document.createElement('div');
             header.className = 'month-header';
-            header.innerHTML = `<span>${mName}</span><span>🔍 تفاصيل</span>`;
-            header.onclick = () => openMonthModal(mIdx);
+            header.innerHTML = `<span>${mName}</span><span>👁️</span>`;
+            header.onclick = () => showMonthDetails(mIdx);
             
             const daysDiv = document.createElement('div');
             daysDiv.className = 'days-container';
-
-            const days = state.yearlyData.filter(d => d.monthIndex === mIdx);
+            
+            const days = state.yearlyData.filter(d => d.monthIdx === mIdx);
+            // Spacer for first day
             const firstDay = days[0].date.getDay();
             for(let i=0; i<firstDay; i++) {
                 const empty = document.createElement('div');
-                empty.style.backgroundColor = 'transparent';
-                empty.style.border = 'none';
+                empty.style.opacity = '0.3';
                 daysDiv.appendChild(empty);
             }
-
+            
             days.forEach(d => {
-                // Apply Heatmap Logic - Map multiplier to demand level
-                let demandLevel;
-                if (d.multiplier >= 3.5) {
-                    demandLevel = 'very-high';
-                } else if (d.multiplier >= 2.0) {
-                    demandLevel = 'high';
-                } else if (d.multiplier >= 1.3) {
-                    demandLevel = 'medium';
-                } else {
-                    demandLevel = 'neutral';
-                }
-                
+                let heatClass = 'heat-neutral';
+                if(d.mult > 3.0) heatClass = 'heat-very-high';
+                else if(d.mult > 2.0) heatClass = 'heat-high';
+                else if(d.mult > 1.2) heatClass = 'heat-medium';
+
                 const cell = document.createElement('div');
-                cell.className = `day-cell ${d.cssClass} heat-${demandLevel}`;
+                cell.className = `day-cell ${heatClass}`;
                 cell.textContent = d.day;
-                cell.title = `${d.season} - الإيراد: ${d.totalRev.toLocaleString()} ريال`;
-                cell.onclick = (e) => { e.stopPropagation(); openDayModal(d); };
+                // Add dot if strategy active
+                if(d.strategies.length > 0) {
+                    const dot = document.createElement('div');
+                    dot.style.cssText = 'width:5px;height:5px;background:var(--dark-blue);border-radius:50%;position:absolute;bottom:3px;right:3px;';
+                    cell.appendChild(dot);
+                }
+                cell.title = `${d.season} | الإيراد: ${d.totalRev.toLocaleString()} ريال | الاستراتيجيات: ${d.strategies.map(s => strategyInfo[s].name).join(', ')}`;
+                cell.onclick = (e) => { e.stopPropagation(); showDayDetails(d); };
                 daysDiv.appendChild(cell);
             });
-
-            card.append(header, daysDiv);
+            
+            card.appendChild(header);
+            card.appendChild(daysDiv);
             grid.appendChild(card);
         });
+
+        // Render Strategies Footer
+        renderStrategiesFooter();
     }
 
-    function openDayModal(d) {
-        document.getElementById('modalDateTitle').textContent = `${d.day} ${state.months[d.monthIndex]} 2026 (${d.season})`;
-        document.getElementById('modalSeasonInfo').textContent = `معامل السعر: x${d.multiplier} | نسبة الإشغال: ${d.rooms[0].occ}% | الإيراد اليومي: ${d.totalRev.toLocaleString()} ريال`;
+    function renderStrategiesFooter() {
+        const container = document.getElementById('strategiesContainer');
+        container.innerHTML = '';
         
-        const tbody = document.getElementById('dayModalBody');
-        tbody.innerHTML = '';
-        d.rooms.forEach(r => {
-            tbody.innerHTML += `
-                <tr>
-                    <td style="font-weight:600; color:var(--dark-blue)">${r.name}</td>
-                    <td>${r.stdPrice.toLocaleString()} ريال</td>
-                    <td style="color:var(--orange); font-weight:600">${r.viewPrice.toLocaleString()} ريال</td>
-                    <td style="color:var(--green); font-weight:700">${r.rev.toLocaleString()} ريال</td>
-                </tr>`;
+        const activeStrategies = Object.keys(state.strategies).filter(key => state.strategies[key]);
+        
+        if (activeStrategies.length === 0) {
+            container.innerHTML = '<p class="text-muted" style="text-align:center; padding:20px; color:var(--gray);">لم يتم تطبيق أي استراتيجيات. قم بتفعيل الاستراتيجيات من الإعدادات.</p>';
+            return;
+        }
+        
+        activeStrategies.forEach(key => {
+            if (strategyInfo[key]) {
+                const strat = strategyInfo[key];
+                const card = document.createElement('div');
+                card.className = 'strategy-card';
+                card.innerHTML = `
+                    <h3>${strat.name}</h3>
+                    <p>${strat.desc}</p>
+                    <div class="strategy-badge">مُفعّل</div>
+                `;
+                container.appendChild(card);
+            }
         });
-        document.getElementById('dayModal').classList.add('active');
     }
 
-    function openMonthModal(mIdx) {
-        document.getElementById('monthModalTitle').textContent = `تفاصيل شهر ${state.months[mIdx]} 2026`;
-        const days = state.yearlyData.filter(d => d.monthIndex === mIdx);
+    function showMonthDetails(mIdx) {
+        const days = state.yearlyData.filter(d => d.monthIdx === mIdx);
+        document.getElementById('detailsTitle').textContent = `تفاصيل شهر ${monthsAr[mIdx]}`;
         
-        let headHTML = `<th>اليوم</th><th>المناسبة</th>`;
-        state.roomTypes.forEach(rt => {
-             headHTML += `<th>${rt.name} (عادي)</th><th>${rt.name} (إطلالة)</th>`; 
-        });
-        headHTML += `<th>الإجمالي اليومي</th>`;
-        document.getElementById('monthTableHead').innerHTML = headHTML;
-
-        let bodyHTML = '';
+        let th = `<tr><th>اليوم</th><th>المناسبة</th><th>الاستراتيجيات</th><th>الإشغال</th><th>الإيراد اليومي</th></tr>`;
+        document.getElementById('detailsHead').innerHTML = th;
+        
+        let tb = '';
         days.forEach(d => {
-            let row = `<tr>
-                <td style="font-weight:600">${d.day}</td>
-                <td style="color:${d.multiplier > 1.5 ? 'var(--dark-blue)' : 'inherit'}; font-weight:${d.multiplier > 1.5 ? '600' : 'normal'}">${d.season}</td>`;
-            
-            d.rooms.forEach(r => {
-                row += `<td>${r.stdPrice.toLocaleString()}</td><td style="color:var(--orange)">${r.viewPrice.toLocaleString()}</td>`;
-            });
-            
-            row += `<td style="font-weight:bold; color:var(--green)">${d.totalRev.toLocaleString()} ريال</td></tr>`;
-            bodyHTML += row;
+            const strategyNames = d.strategies.map(s => strategyInfo[s].name).join(', ') || '-';
+            tb += `<tr>
+                <td>${d.day}</td>
+                <td>${d.season}</td>
+                <td style="font-size:0.8rem; color:var(--gray)">${strategyNames}</td>
+                <td>${d.occ}%</td>
+                <td style="color:var(--green); font-weight:bold">${d.totalRev.toLocaleString()} ريال</td>
+            </tr>`;
         });
-        document.getElementById('monthTableBody').innerHTML = bodyHTML;
-        document.getElementById('monthModal').classList.add('active');
+        document.getElementById('detailsBody').innerHTML = tb;
+        document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showDayDetails(d) {
+        document.getElementById('detailsTitle').textContent = `تفاصيل يوم ${d.day} ${monthsAr[d.monthIdx]}`;
+        
+        let th = `<tr><th>نوع الغرفة</th><th>السعر العادي</th><th>سعر الإطلالة</th><th>الإيراد</th></tr>`;
+        document.getElementById('detailsHead').innerHTML = th;
+        
+        let tb = '';
+        d.rooms.forEach(r => {
+            tb += `<tr>
+                <td>${r.name}</td>
+                <td>${r.rate.toLocaleString()} ريال</td>
+                <td>${r.viewRate.toLocaleString()} ريال</td>
+                <td style="color:var(--green); font-weight:bold">${r.rev.toLocaleString()} ريال</td>
+            </tr>`;
+        });
+        document.getElementById('detailsBody').innerHTML = tb;
+        document.getElementById('detailsModal').classList.add('active');
     }
 
     function exportExcel() {
         const wb = XLSX.utils.book_new();
         
-        const summaryData = [
-            ["تقرير الفندق المالي - مكة والمدينة 2026"],
+        // Summary Sheet
+        const summary = [
+            ["تقرير استراتيجيات SmartHotel 2026"],
             ["اسم الفندق", state.hotelInfo.name],
-            ["الإيجار السنوي", state.hotelInfo.rent.toLocaleString() + " ريال"],
-            ["الإيراد المتوقع", document.getElementById('totalRevenueDisplay').textContent],
-            ["صافي الربح المتوقع", document.getElementById('netProfitDisplay').textContent],
-            ["نسبة الربح الجديدة", document.getElementById('newMarginDisplay').textContent],
-            ["عدد غرف الإطلالة", state.hotelInfo.viewRooms]
+            ["الاستراتيجيات المفعلة", Object.keys(state.strategies).filter(k => state.strategies[k]).join(", ")],
+            ["إجمالي الإيراد", document.getElementById('totalRevenueDisplay').textContent],
+            ["صافي الربح", document.getElementById('netProfitDisplay').textContent]
         ];
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), "الملخص المالي");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), "الملخص");
 
-        const headers = ["التاريخ", "المناسبة"];
-        state.roomTypes.forEach(rt => { 
-            headers.push(`${rt.name} سعر عادي`);
-            headers.push(`${rt.name} سعر إطلالة`); 
-        });
-        headers.push("الإشغال %", "الإيراد اليومي (ريال)");
+        // Data Sheet
+        const headers = ["التاريخ", "المناسبة", "الاستراتيجيات", "نسبة السعر %", "الإشغال %", "الإيراد اليومي"];
+        const rows = state.yearlyData.map(d => [
+            `${d.day}/${d.monthIdx+1}/2026`,
+            d.season,
+            d.strategies.map(s => strategyInfo[s].name).join(", "),
+            (d.mult * 100).toFixed(0) + "%",
+            d.occ + "%",
+            d.totalRev
+        ]);
         
-        const rows = [headers];
-        state.yearlyData.forEach(d => {
-            const row = [`${d.day}/${d.monthIndex+1}/2026`, d.season];
-            d.rooms.forEach(r => { 
-                row.push(r.stdPrice.toLocaleString());
-                row.push(r.viewPrice.toLocaleString());
-            });
-            row.push(d.rooms[0].occ + "%", d.totalRev.toLocaleString());
-            rows.push(row);
-        });
-        
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "جدول الأسعار");
-        XLSX.writeFile(wb, "Haram_Hotel_Plan_2026.xlsx");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), "البيانات اليومية");
+        XLSX.writeFile(wb, "SmartHotel_Strategies_2026.xlsx");
     }
 </script>
+
 </body>
 </html>
