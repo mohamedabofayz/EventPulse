@@ -1,11 +1,59 @@
-```
-# Documentation and meta files
-CHANGELOG.md
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
-CONTRIBUTORS.md
-ISSUE_TEMPLATE.md
-LICENSE.md
-PULL_REQUEST_TEMPLATE.md
-SECURITY.md
+```gitignore
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+.env
+.venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+.eggs/
+.installed.cfg
+*.egg
+
+# Coverage reports
+.coverage
+htmlcov/
+.coverage.*
+.coverage.xml
+coverage.xml
+
+# Testing
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Icon?
 ```
