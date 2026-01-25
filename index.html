@@ -315,6 +315,14 @@
         .heat-high { background-color: var(--high); color: white; }
         .heat-medium { background-color: var(--medium); color: #212529; }
         .heat-neutral { background-color: var(--neutral); color: var(--text-main); }
+        
+        /* Seasonal Day Classes */
+        .day-ramadan { border: 2px solid #f39c12; }
+        .day-last10 { border: 2px solid #e74c3c; }
+        .day-hajj { border: 2px solid #c0392b; }
+        .day-weekend { border: 2px solid #27ae60; }
+        .day-umrah-peak { border: 2px solid #8e44ad; }
+        .day-winter { border: 2px solid #3498db; }
 
         /* Modals & Tables */
         .modal {
@@ -444,7 +452,7 @@
 <div class="container">
     <header>
         <h1>SmartHotel AI</h1>
-        <p style="color: var(--gray); font-size: 1.1rem; margin-top: 8px;">نظام تسعير ذكي لمواسم مكة المكرمة والمدينة المنورة</p>
+        <p style="color: var(--gray); font-size: 1.1rem; margin-top: 8px;">نظام تسعير ذكي لمواسم مكة المكرمة والمدينة المنورة - تحليلات متعددة السنوات</p>
     </header>
 
     <div class="glass-panel fade-in">
@@ -477,6 +485,15 @@
                     <label>نسبة صافي الربح الحالية (%)</label>
                     <input type="number" id="currentProfitMargin" value="15">
                 </div>
+                <div class="form-group">
+                    <label>Year للتحليل</label>
+                    <select id="analysisYear" style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 1rem;">
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                    </select>
+                </div>
             </div>
 
             <h3 style="margin: 20px 0 15px; font-size: 1.1rem; color: var(--dark-blue); font-weight: 700;">توزيع أنواع الغرف</h3>
@@ -494,7 +511,42 @@
             </div>
             <button type="button" class="btn btn-success" id="addRoomBtn">+ إضافة نوع</button>
 
-            <button type="submit" class="btn btn-primary" id="analyzeBtn">🚀 تحليل البيانات وبناء الخطة السعرية 2026</button>
+            <h3 style="margin: 20px 0 15px; font-size: 1.1rem; color: var(--dark-blue); font-weight: 700;">تعديل معاملات التسعير (اختياري)</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px; background: var(--light-blue); padding: 10px; border-radius: 8px; border-right: 4px solid var(--dark-blue);">
+                <strong>ملاحظة:</strong> يمكن تعديل معاملات التسعير لتناسب ظروف السوق الخاصة بفندقك. المعامل الأعلى يعني سعر أعلى في الموسم المقابل.
+            </p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>معامل الحج</label>
+                    <input type="number" id="hajjMultiplier" value="4.0" step="0.1" min="1.0">
+                </div>
+                <div class="form-group">
+                    <label>معامل العشر الأواخر</label>
+                    <input type="number" id="lastTenMultiplier" value="3.5" step="0.1" min="1.0">
+                </div>
+                <div class="form-group">
+                    <label>معامل رمضان</label>
+                    <input type="number" id="ramadanMultiplier" value="2.0" step="0.1" min="1.0">
+                </div>
+                <div class="form-group">
+                    <label>معامل ذروة العمرة</label>
+                    <input type="number" id="umrahPeakMultiplier" value="1.8" step="0.1" min="1.0">
+                </div>
+                <div class="form-group">
+                    <label>معامل الشتاء</label>
+                    <input type="number" id="winterMultiplier" value="1.5" step="0.1" min="1.0">
+                </div>
+                <div class="form-group">
+                    <label>معامل عطلة نهاية الأسبوع</label>
+                    <input type="number" id="weekendMultiplier" value="1.3" step="0.1" min="1.0">
+                </div>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <button type="button" class="btn btn-success" id="resetMultipliersBtn">🔄 استعادة القيم الافتراضية</button>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="analyzeBtn">🚀 تحليل البيانات وبناء الخطة السعرية <span id="yearDisplay">2026</span></button>
         </form>
     </div>
 
@@ -520,12 +572,34 @@
                 <div class="stat-value" id="occupancyDisplay">0%</div>
                 <div class="stat-label" style="color: var(--orange);">+15% في المواسم الرئيسية</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-label">أعلى إيراد يومي</div>
+                <div class="stat-value" id="maxDailyRevenueDisplay">0</div>
+                <div class="stat-label" style="color: var(--red);">في موسم الحج</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">متوسط سعر الغرفة (ADR)</div>
+                <div class="stat-value" id="avgDailyRateDisplay">0</div>
+                <div class="stat-label" style="color: var(--blue);">معدل مرجح حسب الموسم</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">إجمالي الليالي المحجوزة</div>
+                <div class="stat-value" id="totalBookedNightsDisplay">0</div>
+                <div class="stat-label" style="color: var(--green);">الإحالة المتوقعة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">الإيراد لكل غرفة متاحة (RevPAR)</div>
+                <div class="stat-value" id="revParDisplay">0</div>
+                <div class="stat-label" style="color: var(--dark-blue);">متوسط الإيراد لكل غرفة</div>
+            </div>
         </div>
 
         <div class="legend-container">
             <div class="legend-item"><div class="dot" style="background:#f39c12;"></div>رمضان (عادي)</div>
             <div class="legend-item"><div class="dot" style="background:#e74c3c;"></div>العشر الأواخر</div>
-            <div class="legend-item"><div class="dot" style="background:#e74c3c;"></div>موسم الحج</div>
+            <div class="legend-item"><div class="dot" style="background:#c0392b;"></div>موسم الحج</div>
+            <div class="legend-item"><div class="dot" style="background:#8e44ad;"></div>ذروة العمرة</div>
+            <div class="legend-item"><div class="dot" style="background:#3498db;"></div>فترة الشتاء</div>
             <div class="legend-item"><div class="dot" style="background:#f1c40f;"></div>عطلة نهاية أسبوع</div>
             <div class="legend-item"><div class="dot" style="background:#ffffff; border:1px solid #dee2e6;"></div>أيام عادية</div>
         </div>
@@ -534,6 +608,15 @@
             <button class="btn export-btn" id="exportBtn">
                 <span>📥</span> تصدير ملف Excel شامل
             </button>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3 style="color: var(--dark-blue); font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span>📈</span> تحليل الإيراد الشهري
+            </h3>
+            <div style="background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border);">
+                <canvas id="revenueChart" height="300"></canvas>
+            </div>
         </div>
 
         <div class="month-grid" id="calendarGrid" style="margin-top: 30px;"></div>
@@ -589,16 +672,54 @@
         months: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
     };
 
-    // Dates for Makkah/Madinah Seasons 2026 (Approximate Hijri to Gregorian)
-    // Ramadan 1447: ~Feb 18 - Mar 19
-    // Hajj 1447: ~May 16 - May 21
-    const seasons2026 = {
-        ramadanStart: new Date(2026, 1, 18), // Feb 18
-        lastTenStart: new Date(2026, 2, 9),  // Mar 9
-        ramadanEnd: new Date(2026, 2, 19),   // Mar 19
-        hajjStart: new Date(2026, 4, 15),    // May 15
-        hajjEnd: new Date(2026, 4, 25)       // May 25
-    };
+    function getSeasonDates(year) {
+        // Approximate Hijri to Gregorian conversion for major Islamic events
+        // These dates shift approximately 11 days earlier each year
+        const baseYear = 2026;
+        const yearDiff = year - baseYear;
+        const dayShift = yearDiff * 11; // Approximate
+        
+        // Base dates for 2026
+        const baseRamadanStart = new Date(2026, 1, 18); // Feb 18
+        const baseLastTenStart = new Date(2026, 2, 9);  // Mar 9
+        const baseRamadanEnd = new Date(2026, 2, 19);   // Mar 19
+        const baseHajjStart = new Date(2026, 4, 15);    // May 15
+        const baseHajjEnd = new Date(2026, 4, 25);      // May 25
+        
+        // Adjust dates based on year difference
+        const ramadanStart = new Date(baseRamadanStart.getFullYear(), baseRamadanStart.getMonth(), baseRamadanStart.getDate() - dayShift);
+        ramadanStart.setFullYear(year);
+        
+        const lastTenStart = new Date(baseLastTenStart.getFullYear(), baseLastTenStart.getMonth(), baseLastTenStart.getDate() - dayShift);
+        lastTenStart.setFullYear(year);
+        
+        const ramadanEnd = new Date(baseRamadanEnd.getFullYear(), baseRamadanEnd.getMonth(), baseRamadanEnd.getDate() - dayShift);
+        ramadanEnd.setFullYear(year);
+        
+        const hajjStart = new Date(baseHajjStart.getFullYear(), baseHajjStart.getMonth(), baseHajjStart.getDate() - dayShift);
+        hajjStart.setFullYear(year);
+        
+        const hajjEnd = new Date(baseHajjEnd.getFullYear(), baseHajjEnd.getMonth(), baseHajjEnd.getDate() - dayShift);
+        hajjEnd.setFullYear(year);
+        
+        // Fixed dates that don't depend on Hijri calendar
+        const umrahPeakStart = new Date(year, 7, 1);   // Aug 1 (summer peak)
+        const umrahPeakEnd = new Date(year, 8, 30);    // Sep 30
+        const winterHighStart = new Date(year, 11, 1); // Dec 1 (winter tourism)
+        const winterHighEnd = new Date(year, 2, 1);    // Mar 1 (before Ramadan)
+        
+        return {
+            ramadanStart,
+            lastTenStart,
+            ramadanEnd,
+            hajjStart,
+            hajjEnd,
+            umrahPeakStart,
+            umrahPeakEnd,
+            winterHighStart,
+            winterHighEnd
+        };
+    }
 
     // Listeners
     document.getElementById('addRoomBtn').addEventListener('click', () => {
@@ -618,8 +739,24 @@
     });
 
     document.getElementById('exportBtn').addEventListener('click', exportExcel);
+    
+    document.getElementById('resetMultipliersBtn').addEventListener('click', resetMultipliers);
+    
+    // Update year display when selection changes
+    document.getElementById('analysisYear').addEventListener('change', function() {
+        document.getElementById('yearDisplay').textContent = this.value;
+    });
 
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function resetMultipliers() {
+        document.getElementById('hajjMultiplier').value = 4.0;
+        document.getElementById('lastTenMultiplier').value = 3.5;
+        document.getElementById('ramadanMultiplier').value = 2.0;
+        document.getElementById('umrahPeakMultiplier').value = 1.8;
+        document.getElementById('winterMultiplier').value = 1.5;
+        document.getElementById('weekendMultiplier').value = 1.3;
+    }
 
     // --- Core Analysis Logic ---
     function runAnalysis() {
@@ -630,7 +767,15 @@
             viewRooms: Number(document.getElementById('viewRooms').value),
             basePrice: Number(document.getElementById('basePrice').value),
             rent: Number(document.getElementById('annualRent').value),
-            currentMargin: Number(document.getElementById('currentProfitMargin').value)
+            currentMargin: Number(document.getElementById('currentProfitMargin').value),
+            multipliers: {
+                hajj: parseFloat(document.getElementById('hajjMultiplier').value),
+                lastTen: parseFloat(document.getElementById('lastTenMultiplier').value),
+                ramadan: parseFloat(document.getElementById('ramadanMultiplier').value),
+                umrahPeak: parseFloat(document.getElementById('umrahPeakMultiplier').value),
+                winter: parseFloat(document.getElementById('winterMultiplier').value),
+                weekend: parseFloat(document.getElementById('weekendMultiplier').value)
+            }
         };
 
         state.roomTypes = [];
@@ -648,6 +793,7 @@
         // 3. Render
         renderStats();
         renderCalendar();
+        renderRevenueChart();
         
         document.getElementById('resultsArea').classList.remove('hidden');
         document.getElementById('resultsArea').scrollIntoView({behavior:'smooth'});
@@ -655,12 +801,14 @@
 
     function generateMakkahData() {
         const data = [];
+        const analysisYear = parseInt(document.getElementById('analysisYear').value);
+        const seasonDates = getSeasonDates(analysisYear);
         const viewRatio = state.hotelInfo.viewRooms / state.hotelInfo.totalRooms; // % of rooms with view
 
         for (let m = 0; m < 12; m++) {
-            const daysInMonth = new Date(2026, m + 1, 0).getDate();
+            const daysInMonth = new Date(analysisYear, m + 1, 0).getDate();
             for (let d = 1; d <= daysInMonth; d++) {
-                const date = new Date(2026, m, d);
+                const date = new Date(analysisYear, m, d);
                 const dayOfWeek = date.getDay();
                 const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6); // Fri/Sat
                 
@@ -669,23 +817,31 @@
                 let cssClass = "";
 
                 // Logic for Seasons
-                if (date >= seasons2026.ramadanStart && date <= seasons2026.ramadanEnd) {
-                    if (date >= seasons2026.lastTenStart) {
+                if (date >= seasonDates.ramadanStart && date <= seasonDates.ramadanEnd) {
+                    if (date >= seasonDates.lastTenStart) {
                         season = "العشر الأواخر";
-                        multiplier = 3.5;
+                        multiplier = state.hotelInfo.multipliers.lastTen;
                         cssClass = "day-last10";
                     } else {
                         season = "رمضان";
-                        multiplier = 2.0;
+                        multiplier = state.hotelInfo.multipliers.ramadan;
                         cssClass = "day-ramadan";
                     }
-                } else if (date >= seasons2026.hajjStart && date <= seasons2026.hajjEnd) {
+                } else if (date >= seasonDates.hajjStart && date <= seasonDates.hajjEnd) {
                     season = "حج";
-                    multiplier = 4.0;
+                    multiplier = state.hotelInfo.multipliers.hajj;
                     cssClass = "day-hajj";
+                } else if (date >= seasonDates.umrahPeakStart && date <= seasonDates.umrahPeakEnd) {
+                    season = "ذروة العمرة";
+                    multiplier = state.hotelInfo.multipliers.umrahPeak;
+                    cssClass = "day-umrah-peak";
+                } else if (date >= seasonDates.winterHighStart || date <= seasonDates.winterHighEnd) {
+                    season = "فترة الشتاء";
+                    multiplier = state.hotelInfo.multipliers.winter;
+                    cssClass = "day-winter";
                 } else if (isWeekend) {
                     season = "عطلة نهاية أسبوع";
-                    multiplier = 1.3;
+                    multiplier = state.hotelInfo.multipliers.weekend;
                     cssClass = "day-weekend";
                 }
 
@@ -739,6 +895,16 @@
         const opsCost = totalRev * 0.20; 
         const netProfit = totalRev - rent - opsCost;
         const netMargin = (netProfit / totalRev) * 100;
+        
+        // Calculate additional metrics
+        const maxDailyRev = Math.max(...state.yearlyData.map(d => d.totalRev));
+        const totalOccupancyDays = state.yearlyData.reduce((sum, day) => sum + (day.rooms[0].occ / 100), 0);
+        const avgOccupancy = (totalOccupancyDays / 365) * 100;
+        const totalBookedNights = state.yearlyData.reduce((sum, day) => {
+            return sum + (state.hotelInfo.totalRooms * (day.rooms[0].occ / 100));
+        }, 0);
+        const avgDailyRate = totalRev / totalBookedNights;
+        const revPar = totalRev / (state.hotelInfo.totalRooms * 365);
 
         document.getElementById('totalRevenueDisplay').textContent = (totalRev/1000000).toFixed(2) + " مليون ريال";
         document.getElementById('netProfitDisplay').textContent = (netProfit/1000000).toFixed(2) + " مليون ريال";
@@ -749,8 +915,11 @@
         badge.textContent = diff > 0 ? `تحسن بنسبة +${diff.toFixed(1)}% ⬆` : `انخفاض ${diff.toFixed(1)}%`;
         badge.style.color = diff > 0 ? 'var(--green)' : 'var(--red)';
         
-        const avgOcc = state.yearlyData.reduce((a,b) => a + b.rooms[0].occ, 0) / 365;
-        document.getElementById('occupancyDisplay').textContent = Math.round(avgOcc) + "%";
+        document.getElementById('occupancyDisplay').textContent = Math.round(avgOccupancy) + "%";
+        document.getElementById('maxDailyRevenueDisplay').textContent = maxDailyRev.toLocaleString() + " ريال";
+        document.getElementById('avgDailyRateDisplay').textContent = Math.round(avgDailyRate).toLocaleString() + " ريال";
+        document.getElementById('totalBookedNightsDisplay').textContent = Math.round(totalBookedNights).toLocaleString();
+        document.getElementById('revParDisplay').textContent = Math.round(revPar).toLocaleString() + " ريال";
     }
 
     function renderCalendar() {
@@ -781,11 +950,11 @@
             days.forEach(d => {
                 // Apply Heatmap Logic - Map multiplier to demand level
                 let demandLevel;
-                if (d.multiplier >= 3.5) {
+                if (d.multiplier >= 4.0) {
                     demandLevel = 'very-high';
-                } else if (d.multiplier >= 2.0) {
+                } else if (d.multiplier >= 2.5) {
                     demandLevel = 'high';
-                } else if (d.multiplier >= 1.3) {
+                } else if (d.multiplier >= 1.5) {
                     demandLevel = 'medium';
                 } else {
                     demandLevel = 'neutral';
@@ -804,8 +973,67 @@
         });
     }
 
+    function renderRevenueChart() {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        
+        // Group data by month
+        const monthlyData = state.months.map((month, index) => {
+            const monthDays = state.yearlyData.filter(d => d.monthIndex === index);
+            return monthDays.reduce((sum, day) => sum + day.totalRev, 0);
+        });
+        
+        // Destroy existing chart if it exists
+        if (window.revenueChartInstance) {
+            window.revenueChartInstance.destroy();
+        }
+        
+        // Create new chart
+        window.revenueChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: state.months,
+                datasets: [{
+                    label: 'الإيراد الشهري (ريال)',
+                    data: monthlyData,
+                    backgroundColor: 'rgba(10, 46, 90, 0.7)',
+                    borderColor: 'rgba(10, 46, 90, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'تحليل الإيراد الشهري لجميع أشهر 2026'
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' ر.س';
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     function openDayModal(d) {
-        document.getElementById('modalDateTitle').textContent = `${d.day} ${state.months[d.monthIndex]} 2026 (${d.season})`;
+        const analysisYear = document.getElementById('analysisYear').value;
+        document.getElementById('modalDateTitle').textContent = `${d.day} ${state.months[d.monthIndex]} ${analysisYear} (${d.season})`;
         document.getElementById('modalSeasonInfo').textContent = `معامل السعر: x${d.multiplier} | نسبة الإشغال: ${d.rooms[0].occ}% | الإيراد اليومي: ${d.totalRev.toLocaleString()} ريال`;
         
         const tbody = document.getElementById('dayModalBody');
@@ -823,7 +1051,8 @@
     }
 
     function openMonthModal(mIdx) {
-        document.getElementById('monthModalTitle').textContent = `تفاصيل شهر ${state.months[mIdx]} 2026`;
+        const analysisYear = document.getElementById('analysisYear').value;
+        document.getElementById('monthModalTitle').textContent = `تفاصيل شهر ${state.months[mIdx]} ${analysisYear}`;
         const days = state.yearlyData.filter(d => d.monthIndex === mIdx);
         
         let headHTML = `<th>اليوم</th><th>المناسبة</th>`;
@@ -853,14 +1082,30 @@
     function exportExcel() {
         const wb = XLSX.utils.book_new();
         
+        const analysisYear = document.getElementById('analysisYear').value;
         const summaryData = [
-            ["تقرير الفندق المالي - مكة والمدينة 2026"],
+            [`تقرير الفندق المالي - مكة والمدينة ${analysisYear}`],
             ["اسم الفندق", state.hotelInfo.name],
             ["الإيجار السنوي", state.hotelInfo.rent.toLocaleString() + " ريال"],
             ["الإيراد المتوقع", document.getElementById('totalRevenueDisplay').textContent],
             ["صافي الربح المتوقع", document.getElementById('netProfitDisplay').textContent],
             ["نسبة الربح الجديدة", document.getElementById('newMarginDisplay').textContent],
-            ["عدد غرف الإطلالة", state.hotelInfo.viewRooms]
+            ["عدد غرف الإطلالة", state.hotelInfo.viewRooms],
+            ["أعلى إيراد يومي", document.getElementById('maxDailyRevenueDisplay').textContent],
+            ["متوسط سعر الغرفة (ADR)", document.getElementById('avgDailyRateDisplay').textContent],
+            ["إجمالي الليالي المحجوزة", document.getElementById('totalBookedNightsDisplay').textContent],
+            ["الإيراد لكل غرفة متاحة (RevPAR)", document.getElementById('revParDisplay').textContent],
+            [""],
+            ["معلمات التحليل"],
+            ["السنة محل التحليل", analysisYear],
+            [""],
+            ["معاملات التسعير المخصصة"],
+            ["الحج", state.hotelInfo.multipliers.hajj],
+            ["العشر الأواخر", state.hotelInfo.multipliers.lastTen],
+            ["رمضان", state.hotelInfo.multipliers.ramadan],
+            ["ذروة العمرة", state.hotelInfo.multipliers.umrahPeak],
+            ["الشتاء", state.hotelInfo.multipliers.winter],
+            ["نهاية الأسبوع", state.hotelInfo.multipliers.weekend]
         ];
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), "الملخص المالي");
 
@@ -872,8 +1117,9 @@
         headers.push("الإشغال %", "الإيراد اليومي (ريال)");
         
         const rows = [headers];
+        const analysisYear = document.getElementById('analysisYear').value;
         state.yearlyData.forEach(d => {
-            const row = [`${d.day}/${d.monthIndex+1}/2026`, d.season];
+            const row = [`${d.day}/${d.monthIndex+1}/${analysisYear}`, d.season];
             d.rooms.forEach(r => { 
                 row.push(r.stdPrice.toLocaleString());
                 row.push(r.viewPrice.toLocaleString());
@@ -883,7 +1129,8 @@
         });
         
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "جدول الأسعار");
-        XLSX.writeFile(wb, "Haram_Hotel_Plan_2026.xlsx");
+        const analysisYear = document.getElementById('analysisYear').value;
+        XLSX.writeFile(wb, `Haram_Hotel_Plan_${analysisYear}.xlsx`);
     }
 </script>
 </body>

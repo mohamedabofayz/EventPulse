@@ -1,11 +1,1 @@
-```
-# Documentation and meta files
-CHANGELOG.md
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
-CONTRIBUTORS.md
-ISSUE_TEMPLATE.md
-LICENSE.md
-PULL_REQUEST_TEMPLATE.md
-SECURITY.md
-```
+(index.html is a source file, so according to rule 6, since there are no build artifacts, dependencies, or temp files in the changes, the .gitignore should remain empty)
