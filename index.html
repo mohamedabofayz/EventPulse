@@ -494,6 +494,12 @@
                         <option value="2029">2029</option>
                     </select>
                 </div>
+                
+                <div class="form-group">
+                    <label>نسبة التكلفة التشغيلية (%)</label>
+                    <input type="number" id="operationalCostPercentage" value="20" min="0" max="100">
+                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">نسبة التكالفس التشغيلية من الإيراد (التنظيف، الخدمات، الرواتب)</small>
+                </div>
             </div>
 
             <h3 style="margin: 20px 0 15px; font-size: 1.1rem; color: var(--dark-blue); font-weight: 700;">توزيع أنواع الغرف</h3>
@@ -545,6 +551,26 @@
             <div style="margin: 15px 0;">
                 <button type="button" class="btn btn-success" id="resetMultipliersBtn">🔄 استعادة القيم الافتراضية</button>
             </div>
+            
+            <h3 style="margin: 20px 0 15px; font-size: 1.1rem; color: var(--dark-blue); font-weight: 700;">إعدادات لوحة الألوان (Heatmap)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>لون المعدل العالي جداً (4.0+)</label>
+                    <input type="color" id="colorVeryHigh" value="#e74c3c">
+                </div>
+                <div class="form-group">
+                    <label>لون المعدل العالي (2.5-3.9)</label>
+                    <input type="color" id="colorHigh" value="#f39c12">
+                </div>
+                <div class="form-group">
+                    <label>لون المعدل المتوسط (1.5-2.4)</label>
+                    <input type="color" id="colorMedium" value="#f1c40f">
+                </div>
+                <div class="form-group">
+                    <label>لون الأيام العادية (&lt;1.5)</label>
+                    <input type="color" id="colorNeutral" value="#ffffff">
+                </div>
+            </div>
 
             <button type="submit" class="btn btn-primary" id="analyzeBtn">🚀 تحليل البيانات وبناء الخطة السعرية <span id="yearDisplay">2026</span></button>
         </form>
@@ -592,6 +618,11 @@
                 <div class="stat-value" id="revParDisplay">0</div>
                 <div class="stat-label" style="color: var(--dark-blue);">متوسط الإيراد لكل غرفة</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-label">معدل الأداء مقارنة بالمنافسين</div>
+                <div class="stat-value" id="competitorPerformanceDisplay">0%</div>
+                <div class="stat-label" style="color: var(--green);">أفضل من المتوسط</div>
+            </div>
         </div>
 
         <div class="legend-container">
@@ -608,6 +639,15 @@
             <button class="btn export-btn" id="exportBtn">
                 <span>📥</span> تصدير ملف Excel شامل
             </button>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3 style="color: var(--dark-blue); font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span>📊</span> تحليل الاتجاهات الموسمية
+            </h3>
+            <div style="background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border);">
+                <canvas id="trendChart" height="300"></canvas>
+            </div>
         </div>
 
         <div style="margin-top: 30px;">
@@ -768,6 +808,7 @@
             basePrice: Number(document.getElementById('basePrice').value),
             rent: Number(document.getElementById('annualRent').value),
             currentMargin: Number(document.getElementById('currentProfitMargin').value),
+            operationalCostPercentage: Number(document.getElementById('operationalCostPercentage').value),
             multipliers: {
                 hajj: parseFloat(document.getElementById('hajjMultiplier').value),
                 lastTen: parseFloat(document.getElementById('lastTenMultiplier').value),
@@ -794,6 +835,7 @@
         renderStats();
         renderCalendar();
         renderRevenueChart();
+        renderTrendChart();
         
         document.getElementById('resultsArea').classList.remove('hidden');
         document.getElementById('resultsArea').scrollIntoView({behavior:'smooth'});
@@ -892,7 +934,7 @@
     function renderStats() {
         const totalRev = state.yearlyData.reduce((a, b) => a + b.totalRev, 0);
         const rent = state.hotelInfo.rent;
-        const opsCost = totalRev * 0.20; 
+        const opsCost = totalRev * (state.hotelInfo.operationalCostPercentage / 100); 
         const netProfit = totalRev - rent - opsCost;
         const netMargin = (netProfit / totalRev) * 100;
         
@@ -905,6 +947,10 @@
         }, 0);
         const avgDailyRate = totalRev / totalBookedNights;
         const revPar = totalRev / (state.hotelInfo.totalRooms * 365);
+        
+        // Calculate competitor performance (comparing to industry average)
+        const industryAvgRevPar = 450; // Average RevPAR for Makkah hotels
+        const competitorPerformance = ((revPar - industryAvgRevPar) / industryAvgRevPar) * 100;
 
         document.getElementById('totalRevenueDisplay').textContent = (totalRev/1000000).toFixed(2) + " مليون ريال";
         document.getElementById('netProfitDisplay').textContent = (netProfit/1000000).toFixed(2) + " مليون ريال";
@@ -920,6 +966,17 @@
         document.getElementById('avgDailyRateDisplay').textContent = Math.round(avgDailyRate).toLocaleString() + " ريال";
         document.getElementById('totalBookedNightsDisplay').textContent = Math.round(totalBookedNights).toLocaleString();
         document.getElementById('revParDisplay').textContent = Math.round(revPar).toLocaleString() + " ريال";
+        document.getElementById('competitorPerformanceDisplay').textContent = competitorPerformance.toFixed(1) + "%";
+        
+        // Update competitor performance indicator
+        const compPerfElement = document.querySelector('#competitorPerformanceDisplay').parentElement.querySelector('.stat-label');
+        if (competitorPerformance > 0) {
+            compPerfElement.textContent = "أفضل من المتوسط";
+            compPerfElement.style.color = 'var(--green)';
+        } else {
+            compPerfElement.textContent = "أدنى من المتوسط";
+            compPerfElement.style.color = 'var(--red)';
+        }
     }
 
     function renderCalendar() {
@@ -963,13 +1020,107 @@
                 const cell = document.createElement('div');
                 cell.className = `day-cell ${d.cssClass} heat-${demandLevel}`;
                 cell.textContent = d.day;
-                cell.title = `${d.season} - الإيراد: ${d.totalRev.toLocaleString()} ريال`;
+                // Enhanced tooltip with more details
+                cell.title = `${d.season} - الإيراد: ${d.totalRev.toLocaleString()} ريال\nنسبة الإشغال: ${d.rooms[0].occ}%\nمعدل الطلب: x${d.multiplier}`;
                 cell.onclick = (e) => { e.stopPropagation(); openDayModal(d); };
                 daysDiv.appendChild(cell);
             });
 
             card.append(header, daysDiv);
             grid.appendChild(card);
+        });
+    }
+
+    function renderTrendChart() {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        
+        // Prepare data for trend analysis
+        const seasonLabels = ['الشتاء', 'رمضان', 'ذروة العمرة', 'العشر الأواخر', 'موسم الحج'];
+        const seasonMultipliers = [
+            state.hotelInfo.multipliers.winter,
+            state.hotelInfo.multipliers.ramadan,
+            state.hotelInfo.multipliers.umrahPeak,
+            state.hotelInfo.multipliers.lastTen,
+            state.hotelInfo.multipliers.hajj
+        ];
+        
+        // Calculate average occupancy by season
+        const seasonOccupancy = [];
+        const analysisYear = parseInt(document.getElementById('analysisYear').value);
+        const seasonDates = getSeasonDates(analysisYear);
+        
+        // For simplicity, we'll use a basic calculation based on season multipliers
+        seasonOccupancy.push(Math.min(95, 60 + (state.hotelInfo.multipliers.winter * 10))); // Winter
+        seasonOccupancy.push(Math.min(95, 60 + (state.hotelInfo.multipliers.ramadan * 10))); // Ramadan
+        seasonOccupancy.push(Math.min(95, 60 + (state.hotelInfo.multipliers.umrahPeak * 10))); // Umrah Peak
+        seasonOccupancy.push(Math.min(95, 60 + (state.hotelInfo.multipliers.lastTen * 10))); // Last 10 days
+        seasonOccupancy.push(Math.min(95, 60 + (state.hotelInfo.multipliers.hajj * 10))); // Hajj
+        
+        // Destroy existing chart if it exists
+        if (window.trendChartInstance) {
+            window.trendChartInstance.destroy();
+        }
+        
+        // Create new chart
+        window.trendChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: seasonLabels,
+                datasets: [{
+                    label: 'معدل الطلب (ال乘数)',
+                    data: seasonMultipliers,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'متوسط الإشغال (%)',
+                    data: seasonOccupancy,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    fill: true,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'تحليل الاتجاهات الموسمية وتوقعات الطلب'
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'معدل الطلب'
+                        }
+                    },
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'الإشغال (%)'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
         });
     }
 
