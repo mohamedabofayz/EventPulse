@@ -201,9 +201,9 @@ document.getElementById('refreshEventsBtn').addEventListener('click', async () =
 });
 ```
 
-### 4. تعديل دالة التهيئة لتحميل الأحداث عند بدء النظام
+### 4. تعديل دالة التهيئة لتحميل الأحداث من رابط ويب هوك
 
-نحتاج لتعديل دالة التهيئة:
+نحتاج لتعديل دالة التهيئة لتحميل الأحداث من ويب هوك:
 
 ```javascript
 // At the end of the script, initialize the system
