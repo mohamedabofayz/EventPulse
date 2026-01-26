@@ -97,7 +97,7 @@ color: var(--dark-blue);
 font-weight: 600;
 font-size: 0.9rem;
 }
-input {
+input, select {
 width: 100%;
 background: var(--input-bg);
 border: 1px solid var(--border);
@@ -107,7 +107,7 @@ border-radius: 8px;
 font-family: inherit;
 font-size: 0.95rem;
 }
-input:focus {
+input:focus, select:focus {
 border-color: var(--dark-blue);
 outline: none;
 box-shadow: 0 0 0 3px rgba(10, 46, 90, 0.1);
@@ -154,6 +154,10 @@ background: #fff; color: var(--danger); width: 35px; height: 35px; border: 1px s
 }
 .btn-success {
 background: var(--green); color: white; width: auto; font-size: 0.9rem; padding: 8px 15px; margin-top: 10px;
+}
+.btn-loading {
+opacity: 0.7;
+pointer-events: none;
 }
 /* Floating Settings Button */
 .settings-fab {
@@ -369,13 +373,18 @@ font-weight: 500;
 <div class="container">
 <header>
 <h1>SmartHotel AI</h1>
-<p style="color: var(--gray);">نظام إدارة الإيرادات الذكي (مكة والمدينة 2026)</p>
+<p style="color: var(--gray);">نظام إدارة الإيرادات الذكي</p>
 </header>
 <div class="glass-panel fade-in">
 <h2 style="margin-bottom: 20px; color: var(--dark-blue);">📄 بيانات الفندق الأساسية</h2>
 <form id="hotelForm">
 <div class="form-grid">
 <div class="form-group"><label>اسم الفندق</label><input type="text" id="hotelName" value="فندق الحرم 2026"></div>
+<div class="form-group"><label>المنطقة / المحافظة</label>
+<select id="provinceSelect">
+    <option value="" disabled selected>جاري تحميل المناطق...</option>
+</select>
+</div>
 <div class="form-group"><label>إجمالي الغرف</label><input type="number" id="totalRooms" value="150"></div>
 <div class="form-group"><label>غرف مطلة</label><input type="number" id="viewRooms" value="45"></div>
 <div class="form-group"><label>السعر الأساسي (ريال)</label><input type="number" id="basePrice" value="450"></div>
@@ -396,11 +405,10 @@ font-weight: 500;
 </div>
 </div>
 <button type="button" class="btn btn-success" id="addRoomBtn">+ إضافة نوع</button>
-<button type="submit" class="btn btn-primary" id="analyzeBtn">تحليل البيانات وتطبيق الاستراتيجيات</button>
+<button type="submit" class="btn btn-primary" id="analyzeBtn">تحليل البيانات وجلب أحداث المنطقة</button>
 </form>
 </div>
 
-<!-- Room Summary Panel -->
 <div class="glass-panel room-summary-panel fade-in" id="roomSummaryPanel">
 <h2 style="margin-bottom: 20px; color: var(--dark-blue);">🏨 توزيع الغرف في الفندق</h2>
 <div class="room-types-grid" id="roomTypesSummary"></div>
@@ -556,10 +564,14 @@ font-weight: 500;
 </div>
 <script>
 // --- Configuration & State ---
+// >>> ضع رابط الـ Webhook الخاص بك هنا <<<
+const GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzBTVYM8eOSXNsbF2HDnOkdwKKdLuF_K9Df4Egn0BvgRRcc212HlUHONg_FlIn7Mw1v/exec"; 
+
 const state = {
 hotelInfo: {},
 roomTypes: [],
 yearlyData: [],
+fetchedEvents: [], // يتم تعبئتها من الـ Webhook
 strategies: {
 earlyBooking: true,
 dynamicPricing: true,
@@ -617,6 +629,10 @@ summerFest: { start: new Date(2026, 6, 1), end: new Date(2026, 7, 30) }, // July
 corporateSeason: { start: new Date(2026, 9, 1), end: new Date(2026, 9, 15) } // Oct (Construct Expo equivalent)
 };
 // --- Event Listeners ---
+document.addEventListener('DOMContentLoaded', () => {
+    fetchProvincesFromGAS(); // جلب المحافظات عند التحميل
+});
+
 document.getElementById('addRoomBtn').addEventListener('click', () => {
 const div = document.createElement('div');
 div.className = 'room-type-row';
@@ -626,9 +642,9 @@ document.getElementById('roomTypesContainer').appendChild(div);
 document.getElementById('roomTypesContainer').addEventListener('click', e => {
 if(e.target.classList.contains('remove-rt')) e.target.parentElement.remove();
 });
-document.getElementById('hotelForm').addEventListener('submit', e => {
+document.getElementById('hotelForm').addEventListener('submit', async e => {
 e.preventDefault();
-runAnalysis();
+await handleAnalysis(); // Changed to Async Handler
 });
 document.getElementById('exportBtn').addEventListener('click', exportExcel);
 function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
@@ -649,11 +665,99 @@ state.multipliers.weekend = Number(document.getElementById('mul_weekend').value)
 closeModal('settingsModal');
 runAnalysis(); // Re-run analysis with new settings
 }
-// --- Core Analysis Logic ---
+
+// --- NEW: Webhook Integration for Provinces & Events ---
+
+// 1. Fetch Provinces List on Load
+async function fetchProvincesFromGAS() {
+    const provinceSelect = document.getElementById('provinceSelect');
+    
+    // إذا لم يكن هناك رابط حقيقي، نستخدم القيم الافتراضية
+    if (GAS_WEBHOOK_URL.includes("YOUR_SCRIPT_URL") || GAS_WEBHOOK_URL === "") {
+        // الابقاء على الخيارات الموجودة في HTML (الافتراضية)
+        return;
+    }
+
+    try {
+        // إرسال طلب لجلب المحافظات: ?action=getProvinces
+        const response = await fetch(`${GAS_WEBHOOK_URL}?action=getProvinces`);
+        if (!response.ok) throw new Error("Webhook Error");
+        const provinces = await response.json();
+        
+        // إذا عادت البيانات كمصفوفة، نقوم بتعبئة القائمة
+        if (Array.isArray(provinces) && provinces.length > 0) {
+            provinceSelect.innerHTML = ''; // مسح "جاري التحميل"
+            provinces.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p; // القيمة المرسلة
+                opt.textContent = p; // النص الظاهر
+                provinceSelect.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.warn("Could not fetch provinces from Webhook, using defaults.", e);
+        // في حال الفشل، نعيد الخيارات الافتراضية إذا كانت قد مسحت
+        if (provinceSelect.options.length <= 1) {
+            provinceSelect.innerHTML = `
+                <option value="Makkah">مكة المكرمة</option>
+                <option value="Madinah">المدينة المنورة</option>
+                <option value="Riyadh">الرياض</option>
+                <option value="Eastern">المنطقة الشرقية</option>
+                <option value="Asir">عسير</option>
+            `;
+        }
+    }
+}
+
+// 2. Main Analysis Handler
+async function handleAnalysis() {
+    const btn = document.getElementById('analyzeBtn');
+    const originalText = btn.textContent;
+    btn.textContent = 'جاري الاتصال بالخوادم...';
+    btn.classList.add('btn-loading');
+
+    const province = document.getElementById('provinceSelect').value;
+    
+    try {
+        await fetchProvinceEvents(province);
+    } catch (err) {
+        console.error("Webhook Error or Offline:", err);
+    } finally {
+        runAnalysis();
+        btn.textContent = originalText;
+        btn.classList.remove('btn-loading');
+    }
+}
+
+// 3. Fetch Events for Selected Province
+async function fetchProvinceEvents(province) {
+    if (GAS_WEBHOOK_URL.includes("YOUR_SCRIPT_URL")) {
+        console.log("No actual Webhook URL provided. Skipping fetch.");
+        state.fetchedEvents = simulateEvents(province);
+        return;
+    }
+
+    try {
+        // إرسال طلب لجلب الأحداث: ?action=getEvents&province=X
+        const url = `${GAS_WEBHOOK_URL}?action=getEvents&province=${encodeURIComponent(province)}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+        // المتوقع: [{ name: "Event Name", date: "2026-10-20" }, ...]
+        state.fetchedEvents = data;
+    } catch (error) {
+        console.warn("Using simulation due to fetch error:", error);
+        state.fetchedEvents = simulateEvents(province);
+    }
+}
+
+
+// --- Core Analysis Logic (UNCHANGED) ---
 function runAnalysis() {
 // 1. Get Form Data
 state.hotelInfo = {
 name: document.getElementById('hotelName').value,
+province: document.getElementById('provinceSelect').value, // Store province
 totalRooms: Number(document.getElementById('totalRooms').value),
 viewRooms: Number(document.getElementById('viewRooms').value),
 basePrice: Number(document.getElementById('basePrice').value),
@@ -729,7 +833,7 @@ if (state.strategies.earlyBooking && (seasonName.includes("رمضان") || seaso
 baseMult += 0.35; // +35% impact
 activeStrategies.push("earlyBooking");
 }
-// Strategy: Event Pricing (National Day / Founding Day)
+// Strategy: Event Pricing (National Day / Founding Day / fetchedEvents)
 if (state.strategies.eventPricing) {
 if (date.getTime() === events2026.foundingDay.getTime()) {
 seasonName = "يوم التأسيس";
@@ -740,6 +844,18 @@ if (date.getTime() === events2026.nationalDay.getTime()) {
 seasonName = "اليوم الوطني";
 baseMult = Math.max(baseMult, 2.5);
 activeStrategies.push("eventPricing");
+}
+// Check fetched events from Webhook
+if (state.fetchedEvents && state.fetchedEvents.length > 0) {
+    const fetchedMatch = state.fetchedEvents.find(ev => {
+        const evDate = new Date(ev.date);
+        return evDate.getDate() === d && evDate.getMonth() === m && evDate.getFullYear() === 2026;
+    });
+    if (fetchedMatch) {
+        seasonName = fetchedMatch.name;
+        baseMult = Math.max(baseMult, 2.5); // Treat like major event
+        activeStrategies.push("eventPricing");
+    }
 }
 }
 // Strategy: Corporate (October Season)
@@ -933,6 +1049,7 @@ const wb = XLSX.utils.book_new();
 const summary = [
 ["تقرير استراتيجيات SmartHotel 2026"],
 ["اسم الفندق", state.hotelInfo.name],
+["المنطقة / المحافظة", state.hotelInfo.province],
 ["الاستراتيجيات المفعلة", Object.keys(state.strategies).filter(k => state.strategies[k]).join(", ")],
 ["إجمالي الغرف", state.hotelInfo.totalRooms],
 ["غرف مطلة", state.hotelInfo.viewRooms],
