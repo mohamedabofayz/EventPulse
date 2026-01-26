@@ -3,75 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بيانات المحافظات</title>
+    <title>تحديث الفعاليات السعودية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sans-serif:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; text-align: center; }
-        .container { background: white; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        input, select, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #28a745; color: white; cursor: pointer; font-size: 16px; font-weight: bold; }
-        button:hover { background-color: #218838; }
-        #result { margin-top: 20px; padding: 15px; border: 1px dashed #ccc; background: #fafafa; min-height: 50px; display: flex; align-items: center; justify-content: center; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; margin: 0 auto; }
+        :root {
+            --primary-color: #0a2e5a;
+            --secondary-color: #0a2e5a;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --accent-green: #2e7d32;
+            --error-red: #c62828;
+        }
+
+        body {
+            font-family: 'Sans-serif', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h2 { color: var(--primary-color); margin-bottom: 25px; font-weight: 700; }
+        
+        .section-label {
+            display: block;
+            text-align: right;
+            font-weight: bold;
+            margin: 20px 0 10px;
+            color: #444;
+            font-size: 1.1rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            background: #fafafa;
+            color: #333;
+            outline: none;
+            direction: ltr;
+        }
+        select:focus { border-color: var(--primary-color); background: #fff; }
+
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .platform-grid input[type="radio"] { display: none; }
+
+        .platform-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background: #fff;
+            height: 100px;
+        }
+
+        .platform-card i {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .platform-grid input[type="radio"]:checked + .platform-card {
+            border-color: var(--primary-color);
+            background-color: #e8f5e9;
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,108,53,0.15);
+        }
+
+        button.submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button.submit-btn:hover { background-color: #005a2b; }
+
+        /* --- تنسيقات الجدول --- */
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            white-space: nowrap;
+        }
+
+        tr:hover { background-color: #f5f5f5; }
+
+        .edit-input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /* تنسيق زر الحفظ في الجدول */
+        .save-row-btn {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            min-width: 70px; /* عرض ثابت لضمان عدم اهتزاز الزر عند تغيير النص */
+            transition: background-color 0.3s ease;
+        }
+        .save-row-btn:hover { background-color: #1b5e20; }
+        
+        /* حالات الزر المختلفة */
+        .save-row-btn.success { background-color: var(--accent-green) !important; cursor: default; }
+        .save-row-btn.error { background-color: var(--error-red) !important; }
+
+        .loader {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>نظام الاستعلام عن المحافظات</h2>
-    
-    <label for="govInput">أدخل اسم المحافظة:</label>
-    <input type="text" id="govInput" placeholder="مثال: القاهرة، الإسكندرية...">
+<div class="main-wrapper">
+    <div class="container">
+        <h2><i class="fas fa-calendar-check"></i> مدير الفعاليات والأحداث</h2>
 
-    <label for="funcSelect">اختر العملية:</label>
-    <select id="funcSelect">
-        <option value="getPopulation">جلب عدد السكان</option>
-        <option value="getArea">جلب المساحة</option>
-    </select>
+        <label class="section-label">اختر المحافظة (Location):</label>
+        <select id="govSelect">
+            <option value="" disabled selected>-- Select City / Province --</option>
+            <option value="Riyadh">Riyadh</option>
+            <option value="Jeddah">Jeddah</option>
+            <option value="Dammam">Dammam</option>
+            <option value="Makkah">Makkah</option>
+            <option value="Madinah">Madinah</option>
+            <option value="Al Ula">Al Ula</option>
+            <option value="Abha">Abha</option>
+            <option value="Taif">Taif</option>
+            <option value="Al Khobar">Al Khobar</option>
+            <option value="Jazan">Jazan</option>
+            <option value="Tabuk">Tabuk</option>
+            <option value="Hail">Hail</option>
+            <option value="Al Bahah">Al Bahah</option>
+        </select>
 
-    <button onclick="fetchData()">تنفيذ</button>
+        <label class="section-label">اختر نوع التحديث:</label>
+        <div class="platform-grid">
+            <label><input type="radio" name="platform" value="google_calendar"><div class="platform-card"><i class="fab fa-google"></i><span>جوجل كالندر</span></div></label>
+            <label><input type="radio" name="platform" value="saudi_events"><div class="platform-card"><i class="fas fa-ticket-alt"></i><span>فعاليات السعودية</span></div></label>
+            <label><input type="radio" name="platform" value="saudi_seasons"><div class="platform-card"><i class="fas fa-umbrella-beach"></i><span>مواسم السعودية</span></div></label>
+            <label><input type="radio" name="platform" value="general_news"><div class="platform-card"><i class="fas fa-newspaper"></i><span>أخبار محلية</span></div></label>
+        </div>
 
-    <div id="loader" class="loader"></div>
-    <div id="result">النتيجة ستظهر هنا...</div>
+        <button class="submit-btn" onclick="sendUpdate()">تحديث البيانات</button>
+        <div id="loader" class="loader"></div>
+        <div id="result"></div>
+    </div>
+
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; color:var(--primary-color);">📊 بيانات الشيت (Sheet Data)</h3>
+            <button onclick="fetchSheetData()" style="padding:8px 15px; cursor:pointer; background:#eee; border:none; border-radius:5px;"><i class="fas fa-sync"></i> تحديث الجدول</button>
+        </div>
+        
+        <div class="table-container">
+            <div id="tableLoader" class="loader"></div>
+            <table id="dataTable">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
-    // ⚠️ استبدل الرابط التالي برابط Web App الخاص بك الذي نسخته من جوجل
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+    // ⚠️⚠️ هام: تأكد أن هذا الرابط هو رابط Web App الخاص بك
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydeVJflP4VwHposHOz6OHEsKxM8dkJV19RC5EZn6eTFwWqZMmUH_MjWMRqT6abaEQc/exec";
 
-    function fetchData() {
-        const gov = document.getElementById('govInput').value;
-        const func = document.getElementById('funcSelect').value;
+    // دالة إرسال التحديث (الجزء العلوي)
+    function sendUpdate() {
+        const gov = document.getElementById('govSelect').value;
         const resultDiv = document.getElementById('result');
         const loader = document.getElementById('loader');
-
-        if(!gov) {
-            resultDiv.innerText = "يرجى كتابة اسم المحافظة أولاً.";
-            return;
+        
+        const platformOptions = document.getElementsByName('platform');
+        let selectedPlatform = null;
+        for (const option of platformOptions) {
+            if (option.checked) {
+                selectedPlatform = option.value;
+                break;
+            }
         }
 
-        // إظهار التحميل
+        if (!gov) { resultDiv.innerHTML = "<span style='color:red'>يرجى اختيار المحافظة أولاً.</span>"; return; }
+        if (!selectedPlatform) { resultDiv.innerHTML = "<span style='color:red'>يرجى اختيار نوع التحديث.</span>"; return; }
+
         resultDiv.innerText = "";
         loader.style.display = "block";
 
-        // بناء الرابط مع البيانات
-        const url = `${SCRIPT_URL}?govName=${encodeURIComponent(gov)}&funcName=${encodeURIComponent(func)}`;
+        const url = `${SCRIPT_URL}?gov=${encodeURIComponent(gov)}&platform=${encodeURIComponent(selectedPlatform)}`;
 
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 loader.style.display = "none";
                 if(data.status === "success") {
-                    resultDiv.innerText = data.data;
+                    resultDiv.innerHTML = `<div style="background:#e8f5e9; padding:10px; border-radius:5px; color:#2e7d32;">${data.message}</div>`;
+                    fetchSheetData(); 
                 } else {
-                    resultDiv.innerText = "حدث خطأ في البيانات.";
+                    resultDiv.innerHTML = `<div style="background:#ffebee; padding:10px; border-radius:5px; color:#c62828;">خطأ: ${data.message}</div>`;
                 }
             })
             .catch(error => {
                 loader.style.display = "none";
+                resultDiv.innerHTML = "<span style='color:red'>فشل الاتصال بالخادم.</span>";
                 console.error('Error:', error);
-                resultDiv.innerText = "فشل الاتصال بالخادم. تأكد من الرابط.";
             });
+    }
+
+    // --- دوال الجدول الجديد ---
+
+    window.onload = function() {
+        fetchSheetData();
+    };
+
+    function fetchSheetData() {
+        const tableBody = document.querySelector("#dataTable tbody");
+        const loader = document.getElementById("tableLoader");
+
+        loader.style.display = "block";
+        tableBody.innerHTML = "";
+        
+        fetch(`${SCRIPT_URL}?action=readData`)
+            .then(response => response.json())
+            .then(json => {
+                loader.style.display = "none";
+                if (json.status === "success") {
+                    renderTable(json.data);
+                } else {
+                    tableBody.innerHTML = "<tr><td colspan='5'>خطأ في جلب البيانات</td></tr>";
+                }
+            })
+            .catch(err => {
+                loader.style.display = "none";
+                console.error(err);
+                tableBody.innerHTML = "<tr><td colspan='5'>تعذر الاتصال بقاعدة البيانات</td></tr>";
+            });
+    }
+
+    function renderTable(data) {
+        const tableHead = document.querySelector("#dataTable thead");
+        const tableBody = document.querySelector("#dataTable tbody");
+        
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
+
+        if (!data || data.length === 0) return;
+
+        let headerRow = "<tr>";
+        data[0].forEach(cell => {
+            headerRow += `<th>${cell}</th>`;
+        });
+        headerRow += "<th>إجراء</th>";
+        headerRow += "</tr>";
+        tableHead.innerHTML = headerRow;
+
+        for (let i = 1; i < data.length; i++) {
+            let rowHtml = "<tr>";
+            
+            data[i].forEach((cell, index) => {
+                if (index === 3) {
+                    rowHtml += `<td>
+                        <input type="text" class="edit-input" id="row-${i+1}-val" value="${cell}" placeholder="%">
+                    </td>`;
+                } else {
+                    rowHtml += `<td>${cell}</td>`;
+                }
+            });
+
+            // تعديل: إضافة ID للزر ليسهل الوصول إليه
+            rowHtml += `<td>
+                <button class="save-row-btn" id="btn-row-${i + 1}" onclick="updatePercentage(${i + 1})">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </td>`;
+            
+            rowHtml += "</tr>";
+            tableBody.innerHTML += rowHtml;
+        }
+    }
+
+    // 🔥🔥 التعديل الجوهري هنا: إلغاء الـ Alert واستبداله بتحديث الزر 🔥🔥
+    function updatePercentage(rowIndex) {
+        const inputVal = document.getElementById(`row-${rowIndex}-val`).value;
+        const btn = document.getElementById(`btn-row-${rowIndex}`);
+        
+        // حفظ النص الأصلي للزر لاستعادته
+        const originalHTML = '<i class="fas fa-save"></i> حفظ';
+        
+        // تغيير حالة الزر إلى "جاري التحميل"
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+
+        const url = `${SCRIPT_URL}?action=updatePercentage&row=${rowIndex}&value=${encodeURIComponent(inputVal)}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    // ✅ حالة النجاح: الزر يصبح أخضر ويكتب "تم"
+                    btn.innerHTML = '<i class="fas fa-check"></i> تم';
+                    btn.classList.add('success');
+                } else {
+                    // ❌ حالة الخطأ من السيرفر: الزر يصبح أحمر
+                    btn.innerHTML = '<i class="fas fa-times"></i> خطأ';
+                    btn.classList.add('error');
+                }
+                
+                // إعادة الزر لحالته الطبيعية بعد 2 ثانية
+                resetButton(btn, originalHTML);
+            })
+            .catch(err => {
+                console.error(err);
+                // ⚠️ حالة فشل الاتصال
+                btn.innerHTML = '<i class="fas fa-wifi"></i> فشل';
+                btn.classList.add('error');
+                
+                resetButton(btn, originalHTML);
+            });
+    }
+
+    // دالة مساعدة لإعادة الزر لطبيعته
+    function resetButton(btn, originalHTML) {
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('success', 'error');
+            btn.disabled = false;
+        }, 2000); // الانتظار لمدة ثانيتين
     }
 </script>
 
