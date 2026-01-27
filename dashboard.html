@@ -1,227 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartHotel AI - نظام التسعير الاستراتيجي 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sans-serif:wght@300;400;600;700;800&display=swap"
-        rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="css/dashboard.css">
-</head>
-
-<body>
-    <div class="container">
-        <header>
-            <h1>SmartHotel AI</h1>
-            <p style="color: var(--gray);">نظام إدارة الإيرادات الذكي
-                يتم تحديث بيانات الأحداث تلقائيًا حسب المدينة من خلال طبقة تكامل سحابي (Cloud Integration Layer) ترتبط
-                بعدة منصات حكومية، بما يضمن توحيد مصادر البيانات، والتحقق من صحتها، وتوفير معلومات أحداث دقيقة ومحدثة
-                لدعم نماذج التسعير والتحليل المتقدم.</p>
-        </header>
-        <div class="glass-panel fade-in">
-            <h2 style="margin-bottom: 20px; color: var(--dark-blue);">📄 بيانات الفندق الأساسية</h2>
-            <form id="hotelForm">
-                <div class="form-grid">
-                    <div class="form-group"><label>اسم الفندق</label><input type="text" id="hotelName"
-                            value="فندق الحرم 2026"></div>
-                    <div class="form-group"><label>المنطقة / المحافظة</label>
-                        <select id="provinceSelect">
-                            <option value="" disabled selected>جاري تحميل المناطق...</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>إجمالي الغرف</label><input type="number" id="totalRooms" value="150">
-                    </div>
-                    <div class="form-group"><label>غرف مطلة</label><input type="number" id="viewRooms" value="45"></div>
-                    <div class="form-group"><label>السعر الأساسي (ريال)</label><input type="number" id="basePrice"
-                            value="450"></div>
-                    <div class="form-group"><label>الإيجار السنوي</label><input type="number" id="annualRent"
-                            value="6000000"></div>
-                    <div class="form-group"><label>هامش الربح الحالي %</label><input type="number"
-                            id="currentProfitMargin" value="12"></div>
-                </div>
-                <h3 style="margin: 20px 0 10px; font-size: 1rem; color: var(--dark-blue);">أنواع الغرف</h3>
-                <div id="roomTypesContainer">
-                    <div class="room-type-row">
-                        <input type="text" class="rt-name" value="غرفة مزدوجة" placeholder="النوع">
-                        <input type="number" class="rt-count" value="100" placeholder="العدد">
-                        <button type="button" class="btn btn-danger remove-rt">×</button>
-                    </div>
-                    <div class="room-type-row">
-                        <input type="text" class="rt-name" value="جناح ملكي" placeholder="النوع">
-                        <input type="number" class="rt-count" value="50" placeholder="العدد">
-                        <button type="button" class="btn btn-danger remove-rt">×</button>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-success" id="addRoomBtn">+ إضافة نوع</button>
-                <button type="submit" class="btn btn-primary" id="analyzeBtn">تحليل البيانات وجلب أحداث المنطقة</button>
-            </form>
-        </div>
-
-        <div class="glass-panel room-summary-panel fade-in" id="roomSummaryPanel">
-            <h2 style="margin-bottom: 20px; color: var(--dark-blue);">🏨 توزيع الغرف في الفندق</h2>
-            <div class="room-types-grid" id="roomTypesSummary"></div>
-        </div>
-
-        <div id="resultsArea" class="hidden fade-in">
-            <div class="dashboard-grid">
-                <div class="stat-card">
-                    <div class="stat-label">الإيراد السنوي المتوقع</div>
-                    <div class="stat-value" id="totalRevenueDisplay">0</div>
-                    <div class="profit-badge" id="revBoostBadge" style="background:#e0f2fe; color:var(--dark-blue)">
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">صافي الربح</div>
-                    <div class="stat-value" style="color: var(--green);" id="netProfitDisplay">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">هامش الربح الجديد</div>
-                    <div class="stat-value" id="newMarginDisplay">0%</div>
-                    <div class="profit-badge" id="marginImprovement"></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">معدل الإشغال السنوي</div>
-                    <div class="stat-value" id="occupancyDisplay">0%</div>
-                    <div class="stat-label" style="font-size:0.8rem; color:var(--orange)">محسن بواسطة Min Stay AI</div>
-                </div>
-            </div>
-            <div class="heatmap-legend">
-                <div class="legend-item">
-                    <div class="legend-color heat-very-high"></div>
-                    <span class="legend-label">ذروة عالية جداً</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color heat-high"></div>
-                    <span class="legend-label">ذروة عالية</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color heat-medium"></div>
-                    <span class="legend-label">ذروة متوسطة</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color heat-neutral"></div>
-                    <span class="legend-label">عادي</span>
-                </div>
-            </div>
-            <div style="text-align: left; margin: 20px 0;">
-                <button class="btn btn-success" id="exportBtn" style="width: auto;">📥 تصدير Excel شامل</button>
-            </div>
-            <div class="month-grid" id="calendarGrid"></div>
-        </div>
-        <div id="strategiesFooter" class="glass-panel hidden fade-in">
-            <h2 style="margin-bottom: 20px; color: var(--dark-blue); display: flex; align-items: center; gap: 10px;">
-                <span>📊 الاستراتيجيات المطبقة</span>
-                <span class="strategy-badge">مُحسّن بواسطة الذكاء الاصطناعي</span>
-            </h2>
-            <div class="strategies-container" id="strategiesContainer"></div>
-        </div>
-    </div>
-    <div class="settings-fab" onclick="openSettings()">⚙️</div>
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h2 style="color:var(--dark-blue)">⚙️ إعدادات الاستراتيجيات الذكية</h2>
-                <button class="btn btn-danger" onclick="closeModal('settingsModal')">×</button>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <div class="settings-section">
-                    <h3>1. استراتيجيات التسعير (Pricing)</h3>
-                    <div class="switch-container">
-                        <div>
-                            <strong>الحجز المبكر (Early Booking)</strong>
-                            <div style="font-size:0.8rem; color:#777">زيادة الأسعار في رمضان/حج بنسبة 35-45%</div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="st_early" checked><span
-                                class="slider"></span></label>
-                    </div>
-                    <div class="switch-container">
-                        <div>
-                            <strong>التسعير الديناميكي (Dynamic)</strong>
-                            <div style="font-size:0.8rem; color:#777">تعديل يومي + Premium Events (يوم التأسيس/الوطني)
-                            </div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="st_dynamic" checked><span
-                                class="slider"></span></label>
-                    </div>
-                    <div class="switch-container">
-                        <div>
-                            <strong>تسعير الأحداث (Event-Specific)</strong>
-                            <div style="font-size:0.8rem; color:#777">زيادة 40% للأحداث الكبرى (فورمولا/مؤتمرات)</div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="st_event" checked><span
-                                class="slider"></span></label>
-                    </div>
-                </div>
-                <div class="settings-section">
-                    <h3>2. تعظيم الإيرادات (Boosters)</h3>
-                    <div class="switch-container">
-                        <div>
-                            <strong>حزم الترقية (Upselling)</strong>
-                            <div style="font-size:0.8rem; color:#777">إضافة وجبات/نقل (+6% ADR)</div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="st_upsell" checked><span
-                                class="slider"></span></label>
-                    </div>
-                    <div class="switch-container">
-                        <div>
-                            <strong>حزم الشركات (Corporate)</strong>
-                            <div style="font-size:0.8rem; color:#777">عروض المؤتمرات والمعارض (+20%)</div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="st_corp"><span class="slider"></span></label>
-                    </div>
-                    <div class="switch-container">
-                        <div>
-                            <strong>الحد الأدنى للإقامة (Min Stay)</strong>
-                            <div style="font-size:0.8rem; color:#777">فرض ليلتين في الذروة (استقرار الإشغال)</div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="st_minstay" checked><span
-                                class="slider"></span></label>
-                    </div>
-                </div>
-            </div>
-            <div class="settings-section" style="margin-top:20px;">
-                <h3>3. مضاعفات المواسم (Multipliers)</h3>
-                <div class="form-grid" style="background:#f8f9fa; padding:15px; border-radius:10px;">
-                    <div class="form-group">
-                        <label>رمضان (%)</label>
-                        <input type="number" id="mul_ramadan" value="250">
-                    </div>
-                    <div class="form-group">
-                        <label>العشر الأواخر (%)</label>
-                        <input type="number" id="mul_last10" value="400">
-                    </div>
-                    <div class="form-group">
-                        <label>موسم الحج (%)</label>
-                        <input type="number" id="mul_hajj" value="450">
-                    </div>
-                    <div class="form-group">
-                        <label>عطلة نهاية الأسبوع (%)</label>
-                        <input type="number" id="mul_weekend" value="130">
-                    </div>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="applySettings()">💾 حفظ وتطبيق التغييرات</button>
-        </div>
-    </div>
-    <div class="modal" id="detailsModal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 id="detailsTitle"></h3>
-                <button class="btn btn-danger" onclick="closeModal('detailsModal')">×</button>
-            </div>
-            <div class="table-responsive" style="overflow-x:auto;">
-                <table id="detailsTable">
-                    <thead id="detailsHead"></thead>
-                    <tbody id="detailsBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <script src="js/dashboard.js"></script>
-</body>
-
-
-</html>
