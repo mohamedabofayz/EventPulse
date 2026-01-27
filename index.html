@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHotel AI - نظام التسعير الاستراتيجي</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #2c3e50 !important;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #007bff;
+            color: white !important;
+            border: 1px solid #007bff;
+        }
+        .tab-content {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            padding: 20px;
+            min-height: 600px;
+        }
+        .strategy-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+            transition: box-shadow 0.3s;
+        }
+        .strategy-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .active-strategy {
+            border-right: 4px solid #28a745;
+            background-color: #f8fff9;
+        }
+        .inactive-strategy {
+            opacity: 0.7;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            display: none;
+        }
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+        .calendar-container {
+            height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="landing-tab" data-bs-toggle="tab" data-bs-target="#landing" type="button" role="tab">الصفحة الرئيسية</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">الداشبورد</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="api-tab" data-bs-toggle="tab" data-bs-target="#api" type="button" role="tab">API</button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="mainTabContent">
+        <!-- Landing Page Tab -->
+        <div class="tab-pane fade show active" id="landing" role="tabpanel">
+            <div class="container mt-4">
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <h1 class="text-center mb-4">نظام التسعير الذكي للفنادق - SmartHotel AI</h1>
+                        <p class="lead text-center mb-5">نظام متكامل لإدارة وتسعير الغرف الفندقية باستخدام الذكاء الاصطناعي والتحليلات المتقدمة</p>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                                        <h5 class="card-title">تحليلات متقدمة</h5>
+                                        <p class="card-text">تحليل بيانات السوق والمنافسين لتسعير دقيق</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-robot fa-3x text-success mb-3"></i>
+                                        <h5 class="card-title">ذكاء اصطناعي</h5>
+                                        <p class="card-text">نماذج تعلم آلي لتحسين التنبؤات</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-sync-alt fa-3x text-info mb-3"></i>
+                                        <h5 class="card-title">تحديثات تلقائية</h5>
+                                        <p class="card-text">تحديثات مستمرة حسب الظروف السوقية</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-4">
+                            <h5><i class="fas fa-lightbulb"></i> المزايا الرئيسية:</h5>
+                            <ul>
+                                <li>نظام ذكاء اصطناعي متكامل لتوقع الأسعار المثلى</li>
+                                <li>واجهة مستخدم تفاعلية وسهلة الاستخدام</li>
+                                <li>تكامل مع خدمات جوجل ونظام حجز الفنادق</li>
+                                <li>تحليلات دقيقة لتحسين الأداء المالي</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div class="tab-pane fade" id="dashboard" role="tabpanel">
+            <div class="container-fluid mt-3">
+                <!-- Active Strategies Section -->
+                <div class="mb-4 p-3 bg-light rounded">
+                    <h4 class="mb-3"><i class="fas fa-bolt"></i> الاستراتيجيات المفعلة</h4>
+                    <div id="activeStrategiesContainer">
+                        <!-- سيتم ملء هذا القسم بالاستراتيجيات المفعلة -->
+                    </div>
+                </div>
+
+                <!-- Sub-tabs for Dashboard -->
+                <ul class="nav nav-pills mb-3" id="dashboardSubTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="input-subtab" data-bs-toggle="pill" data-bs-target="#input-section" type="button" role="tab">نموذج الإدخال</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="charts-subtab" data-bs-toggle="pill" data-bs-target="#charts-section" type="button" role="tab">الشارتات</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="calendar-subtab" data-bs-toggle="pill" data-bs-target="#calendar-section" type="button" role="tab">التقويم</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="dashboardSubTabContent">
+                    <!-- Input Form Section -->
+                    <div class="tab-pane fade show active" id="input-section" role="tabpanel">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-edit"></i> نموذج إدخال معلمات التسعير</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="pricingForm">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="hotelName" class="form-label">اسم الفندق</label>
+                                                    <input type="text" class="form-control" id="hotelName" placeholder="أدخل اسم الفندق">
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="location" class="form-label">الموقع</label>
+                                                    <input type="text" class="form-control" id="location" placeholder="أدخل موقع الفندق">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="seasonFactor" class="form-label">عامل الموسم</label>
+                                                    <select class="form-select" id="seasonFactor">
+                                                        <option value="peak">موسم ذروة</option>
+                                                        <option value="high">موسم مرتفع</option>
+                                                        <option value="low">موسم منخفض</option>
+                                                        <option value="off">موسم منخفض جداً</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="occupancyRate" class="form-label">نسبة الإشغال</label>
+                                                    <input type="range" class="form-range" id="occupancyRate" min="0" max="100" value="50">
+                                                    <span id="occupancyValue">50%</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="competitionFactor" class="form-label">عامل المنافسة</label>
+                                                    <select class="form-select" id="competitionFactor">
+                                                        <option value="high">منافسة عالية</option>
+                                                        <option value="medium">منافسة متوسطة</option>
+                                                        <option value="low">منافسة منخفضة</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="demandLevel" class="form-label">مستوى الطلب</label>
+                                                    <select class="form-select" id="demandLevel">
+                                                        <option value="high">طلب مرتفع</option>
+                                                        <option value="medium">طلب متوسط</option>
+                                                        <option value="low">طلب منخفض</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">الاستراتيجيات المفعلة</label>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="dynamicPricing" checked>
+                                                    <label class="form-check-label" for="dynamicPricing">تسعير ديناميكي</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="weekendSurcharge">
+                                                    <label class="form-check-label" for="weekendSurcharge">رسوم عطلة نهاية الأسبوع</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="lastMinute">
+                                                    <label class="form-check-label" for="lastMinute">خصومات اللحظة الأخيرة</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                <button type="submit" class="btn btn-primary me-md-2">
+                                                    <i class="fas fa-save"></i> حفظ المعلمات
+                                                </button>
+                                                <button type="button" class="btn btn-success" onclick="calculatePrice()">
+                                                    <i class="fas fa-calculator"></i> حساب السعر
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="tab-pane fade" id="charts-section" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> تحليل الأسعار</h5>
+                                    </div>
+                                    <div class="card-body chart-container">
+                                        <canvas id="priceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> توزيع الأسعار</h5>
+                                    </div>
+                                    <div class="card-body chart-container">
+                                        <canvas id="distributionChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> مقارنة الأسعار مع المنافسين</h5>
+                                    </div>
+                                    <div class="card-body chart-container">
+                                        <canvas id="competitorChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Section -->
+                    <div class="tab-pane fade" id="calendar-section" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> تقويم التسعير</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="changeMonth(-1)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <span id="currentMonth" class="mx-3 fw-bold">يناير 2025</span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="changeMonth(1)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body calendar-container">
+                                <table class="table table-bordered text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>السبت</th>
+                                            <th>الأحد</th>
+                                            <th>الاثنين</th>
+                                            <th>الثلاثاء</th>
+                                            <th>الأربعاء</th>
+                                            <th>الخميس</th>
+                                            <th>الجمعة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="calendarBody">
+                                        <!-- سيتم ملء هذا القسم بالتقويم -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Documentation Tab -->
+        <div class="tab-pane fade" id="api" role="tabpanel">
+            <div class="container mt-3">
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <h2 class="mb-4"><i class="fas fa-code"></i> وثائق API</h2>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">APIs متاحة</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6><strong>/api/get-pricing-data</strong></h6>
+                                <p>الحصول على بيانات التسعير حسب المعايير المحددة</p>
+                                <pre class="bg-light p-3 rounded">GET /api/get-pricing-data?hotelId={id}&date={date}&location={location}</pre>
+                                
+                                <h6 class="mt-3"><strong>/api/calculate-price</strong></h6>
+                                <p>حساب السعر الأمثل بناءً على المعلمات المقدمة</p>
+                                <pre class="bg-light p-3 rounded">POST /api/calculate-price
+{
+  "hotelName": "string",
+  "location": "string",
+  "seasonFactor": "string",
+  "occupancyRate": "number",
+  "competitionFactor": "string",
+  "demandLevel": "string"
+}</pre>
+                                
+                                <h6 class="mt-3"><strong>/api/get-market-analysis</strong></h6>
+                                <p>تحليل السوق الحالي والتنبؤ بالأسعار</p>
+                                <pre class="bg-light p-3 rounded">GET /api/get-market-analysis?location={location}&period={days}</pre>
+                                
+                                <h6 class="mt-3"><strong>/api/update-strategies</strong></h6>
+                                <p>تحديث الاستراتيجيات المفعلة</p>
+                                <pre class="bg-light p-3 rounded">POST /api/update-strategies
+{
+  "strategies": ["dynamicPricing", "weekendSurcharge", "lastMinute"]
+}</pre>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle"></i> ملاحظات هامة:</h6>
+                            <ul>
+                                <li>جميع الطلبات يجب أن ترسل مع رأس المصادقة (Authorization header)</li>
+                                <li>يجب استخدام تنسيق JSON عند إرسال البيانات</li>
+                                <li>يتم تطبيق حد المعدل (rate limiting) على جميع نقاط النهاية</li>
+                                <li>الحد الأقصى لعدد الطلبات في الساعة هو 1000 طلب</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Update occupancy rate display
+        document.getElementById('occupancyRate').addEventListener('input', function() {
+            document.getElementById('occupancyValue').textContent = this.value + '%';
+        });
+
+        // Calculate price function
+        function calculatePrice() {
+            const formData = {
+                hotelName: document.getElementById('hotelName').value,
+                location: document.getElementById('location').value,
+                seasonFactor: document.getElementById('seasonFactor').value,
+                occupancyRate: document.getElementById('occupancyRate').value,
+                competitionFactor: document.getElementById('competitionFactor').value,
+                demandLevel: document.getElementById('demandLevel').value
+            };
+            
+            // In a real application, this would call the API
+            console.log('Calculating price with:', formData);
+            alert('تم حساب السعر بنجاح! (تمت المحاكاة)');
+        }
+
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Price Chart
+            const priceCtx = document.getElementById('priceChart').getContext('2d');
+            new Chart(priceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+                    datasets: [{
+                        label: 'أسعار الغرف',
+                        data: [250, 300, 280, 350, 400, 380],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Distribution Chart
+            const distCtx = document.getElementById('distributionChart').getContext('2d');
+            new Chart(distCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['فندق A', 'فندق B', 'فندق C', 'فندق D'],
+                    datasets: [{
+                        data: [35, 25, 20, 20],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 205, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 205, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+            // Competitor Chart
+            const compCtx = document.getElementById('competitorChart').getContext('2d');
+            new Chart(compCtx, {
+                type: 'line',
+                data: {
+                    labels: ['الاسبوع 1', 'الاسبوع 2', 'الاسبوع 3', 'الاسبوع 4'],
+                    datasets: [
+                        {
+                            label: 'فندقنا',
+                            data: [300, 320, 310, 340],
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'منافس 1',
+                            data: [280, 300, 290, 330],
+                            borderColor: 'rgb(255, 99, 132)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'منافس 2',
+                            data: [320, 310, 330, 350],
+                            borderColor: 'rgb(54, 162, 235)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Initialize calendar
+            updateCalendar();
+        });
+
+        // Calendar functionality
+        let currentDate = new Date();
+
+        function updateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            document.getElementById('currentMonth').textContent = 
+                `${getMonthName(month)} ${year}`;
+            
+            const calendarBody = document.getElementById('calendarBody');
+            calendarBody.innerHTML = '';
+            
+            let date = 1;
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement('tr');
+                
+                for (let j = 0; j < 7; j++) {
+                    const cell = document.createElement('td');
+                    
+                    if (i === 0 && j < firstDay) {
+                        cell.textContent = '';
+                    } else if (date > daysInMonth) {
+                        break;
+                    } else {
+                        cell.textContent = date;
+                        cell.style.backgroundColor = getRandomColor();
+                        date++;
+                    }
+                    
+                    row.appendChild(cell);
+                }
+                
+                calendarBody.appendChild(row);
+            }
+        }
+
+        function getMonthName(month) {
+            const months = [
+                'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+            ];
+            return months[month];
+        }
+
+        function getRandomColor() {
+            const colors = ['#e3f2fd', '#f3e5f5', '#e8f5e8', '#fff3e0', '#fce4ec'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            updateCalendar();
+        }
+
+        // Active strategies display
+        function updateActiveStrategies() {
+            const strategiesContainer = document.getElementById('activeStrategiesContainer');
+            strategiesContainer.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="strategy-card active-strategy">
+                            <h6><i class="fas fa-sync-alt text-success"></i> تسعير ديناميكي</h6>
+                            <small class="text-muted">يتم تعديل الأسعار تلقائياً حسب الطلب</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="strategy-card inactive-strategy">
+                            <h6><i class="fas fa-percent text-muted"></i> خصومات موسمية</h6>
+                            <small class="text-muted">غير مفعلة حالياً</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="strategy-card active-strategy">
+                            <h6><i class="fas fa-gift text-success"></i> عروض خاصة</h6>
+                            <small class="text-muted">عروض مخصصة للعملاء المميزين</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize active strategies when dashboard tab is shown
+        document.getElementById('dashboard-tab').addEventListener('shown.bs.tab', function() {
+            updateActiveStrategies();
+        });
+
+        // Initialize when page loads
+        updateActiveStrategies();
+    </script>
+</body>
+</html>
