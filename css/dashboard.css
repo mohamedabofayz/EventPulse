@@ -744,7 +744,7 @@ th {
 /* Month Header Style - Matches Stat Card */
 /* Month Header Style - Matches Stat Card */
 .month-header {
-    background: var(--card-bg);
+    background: #f8f9fa;
     padding: 20px;
     border-radius: 16px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
