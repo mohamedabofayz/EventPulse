@@ -210,10 +210,6 @@ function runAnalysis() {
     if (state.roomTypes.length === 0) return alert('أضف نوع غرفة واحد على الأقل');
     // 2. Generate Data
     state.yearlyData = generateData();
-    // 3. Render Room Summary
-    renderRoomSummary();
-    // 4. Render Dashboard
-    renderDashboard();
 
     // SPA Toggle: Hide Input, Show Results
     document.getElementById('input-view').classList.add('hidden');
@@ -222,10 +218,14 @@ function runAnalysis() {
     // Ensure logic elements are visible within tabs
     document.getElementById('resultsArea').classList.remove('hidden');
     document.getElementById('strategiesFooter').classList.remove('hidden');
-    document.getElementById('roomSummaryPanel').classList.remove('hidden'); // Ensure room summary logic is active
+    document.getElementById('roomSummaryPanel').classList.remove('hidden');
 
     // Reset to Stats Tab
     switchTab('stats');
+
+    // 3. Render Components (Now that containers are visible)
+    renderRoomSummary();
+    renderDashboard();
 
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
