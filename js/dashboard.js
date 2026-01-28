@@ -20,7 +20,9 @@ const state = {
         lastTen: 4.0,
         hajj: 4.5,
         weekend: 1.3
-    }
+    },
+    priceChart: null, // Global chart instance
+    chartView: 'daily' // 'daily' or 'monthly'
 };
 // Strategy information mapping
 const strategyInfo = {
@@ -425,6 +427,8 @@ function renderDashboard() {
     });
     // Render Strategies Footer
     renderStrategiesFooter();
+    // Render Price Movement Chart
+    renderPriceMovementChart();
 }
 function renderStrategiesFooter() {
     const container = document.getElementById('strategiesContainer');
@@ -596,4 +600,183 @@ function switchTab(tabId) {
         document.getElementById('tab-strategies').classList.remove('hidden');
         document.getElementById('btn-strategies').classList.add('active');
     }
+}
+
+// --- NEW: Chart View Toggler ---
+function updateChartView(view) {
+    state.chartView = view;
+
+    // Update button active state
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+    });
+
+    renderPriceMovementChart();
+}
+
+function renderPriceMovementChart() {
+    const ctx = document.getElementById('priceMovementChart').getContext('2d');
+
+    // Helper for Heatmap Colors
+    const getHeatColor = (mult) => {
+        if (mult > 3.0) return '#e74c3c'; // heat-very-high (Red)
+        if (mult > 2.0) return '#f39c12'; // heat-high (Orange)
+        if (mult > 1.2) return '#f1c40f'; // heat-medium (Yellow)
+        return '#aaa'; // Normal (Gray)
+    };
+
+    // Helper to aggregate data for monthly view
+    const getMonthlyData = () => {
+        const monthly = [];
+        for (let m = 0; m < 12; m++) {
+            const monthDays = state.yearlyData.filter(d => d.monthIdx === m);
+            const avgMult = monthDays.reduce((sum, d) => sum + d.mult, 0) / monthDays.length;
+
+            // For monthly markers: show if any day has an event or strategy
+            const hasEvent = monthDays.some(d => d.season !== "عادي" && d.season !== "نهاية الأسبوع");
+            const hasStrategy = monthDays.some(d => d.strategies.length > 0);
+            const mainEvent = monthDays.find(d => d.season !== "عادي" && d.season !== "نهاية الأسبوع" && d.mult > 2.5)?.season || "";
+
+            monthly.push({
+                label: monthsAr[m],
+                mult: avgMult,
+                hasMarker: hasEvent || hasStrategy,
+                eventsCount: monthDays.filter(d => d.season !== "عادي" && d.season !== "نهاية الأسبوع").length,
+                mainEvent: mainEvent
+            });
+        }
+        return monthly;
+    };
+
+    // Destroy existing chart if it exists
+    if (state.priceChart) {
+        state.priceChart.destroy();
+    }
+
+    let labels, dataPoints, events, strategies, rawMults;
+
+    if (state.chartView === 'monthly') {
+        const monthlyData = getMonthlyData();
+        labels = monthlyData.map(m => m.label);
+        dataPoints = monthlyData.map(m => (m.mult * 100).toFixed(0));
+        rawMults = monthlyData.map(m => m.mult);
+        // Special mapping for monthly tooltips/markers
+        events = monthlyData.map(m => m.mainEvent ? m.mainEvent : (m.eventsCount > 0 ? `${m.eventsCount} أحداث` : null));
+        strategies = monthlyData.map(m => m.hasMarker ? "أكثر من استراتيجية" : null);
+    } else {
+        labels = state.yearlyData.map(d => `${d.day}/${d.monthIdx + 1}`);
+        dataPoints = state.yearlyData.map(d => (d.mult * 100).toFixed(0));
+        rawMults = state.yearlyData.map(d => d.mult);
+        events = state.yearlyData.map(d => d.season !== "عادي" && d.season !== "نهاية الأسبوع" ? d.season : null);
+        strategies = state.yearlyData.map(d => d.strategies.length > 0 ? d.strategies.map(s => strategyInfo[s].name).join(', ') : null);
+    }
+
+    state.priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'مؤشر سعر الغرفة (%)',
+                data: dataPoints,
+                borderColor: '#aaa',
+                borderWidth: 2,
+                pointRadius: (context) => {
+                    const index = context.dataIndex;
+                    if (state.chartView === 'monthly') return 6; // Always show monthly points
+                    if (events[index] || strategies[index]) return 5;
+                    return 0;
+                },
+                pointHoverRadius: 7,
+                pointBackgroundColor: (context) => {
+                    const index = context.dataIndex;
+                    const mult = rawMults[index];
+                    return getHeatColor(mult);
+                },
+                pointBorderColor: '#fff',
+                pointBorderWidth: 1.5,
+                tension: 0,
+                fill: false,
+                segment: {
+                    borderColor: ctx => {
+                        const idx = ctx.p0DataIndex;
+                        const mult = rawMults[idx];
+                        return getHeatColor(mult);
+                    },
+                    borderWidth: 2.5
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: { top: 10, bottom: 10, left: 5, right: 5 }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    rtl: true,
+                    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                    titleColor: '#0A2E5A',
+                    bodyColor: '#444',
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    titleFont: { family: 'Cairo', size: 14, weight: '700' },
+                    bodyFont: { family: 'Cairo', size: 13 },
+                    callbacks: {
+                        label: function (context) {
+                            const idx = context.dataIndex;
+                            let lines = [`السعر: ${context.parsed.y}%`];
+                            if (events[idx]) lines.push(`📌 ${state.chartView === 'monthly' ? 'أبرز حدث: ' : 'الحدث: '}${events[idx]}`);
+                            if (strategies[idx] && state.chartView === 'daily') lines.push(`⚡ الاستراتيجية: ${strategies[idx]}`);
+                            return lines;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: { display: false },
+                    ticks: {
+                        color: '#6c757d',
+                        font: { family: 'Cairo', size: 11 },
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: state.chartView === 'monthly' ? 12 : 12,
+                        callback: function (val, index) {
+                            if (state.chartView === 'monthly') return labels[index];
+                            const date = state.yearlyData[index].date;
+                            if (date.getDate() === 1) return monthsAr[date.getMonth()];
+                            return null;
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    min: 100,
+                    grid: {
+                        color: '#f0f0f0',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#6c757d',
+                        font: { family: 'Cairo', size: 11 },
+                        stepSize: state.chartView === 'monthly' ? 50 : 100,
+                        callback: function (value) { return value + '%'; }
+                    }
+                }
+            }
+        }
+    });
 }

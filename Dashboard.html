@@ -109,6 +109,20 @@
                                 AI</div>
                         </div>
                     </div>
+                    <div class="glass-panel fade-in" id="priceChartPanel" style="margin-top: 20px;">
+                        <h2 style="margin-bottom: 20px; color: var(--dark-blue); font-size: 1.2rem;">📈 مؤشر حركة السعر
+                            والاستراتيجيات (2026)</h2>
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="priceMovementChart"></canvas>
+                        </div>
+                        <div class="chart-filters"
+                            style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                            <button class="filter-btn active" data-view="daily" onclick="updateChartView('daily')">📅
+                                يومي</button>
+                            <button class="filter-btn" data-view="monthly" onclick="updateChartView('monthly')">📊
+                                شهري</button>
+                        </div>
+                    </div>
                     <div class="heatmap-legend">
                         <div class="legend-item">
                             <div class="legend-color heat-very-high"></div>
